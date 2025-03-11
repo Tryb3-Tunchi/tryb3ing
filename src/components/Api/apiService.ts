@@ -126,7 +126,7 @@ class ApiService {
         } else {
           console.log("Token refresh failed. Logging out...");
           this.logout();
-          throw new Error("Session expired. Please log in again.");
+          throw new Error("Loading...reload or log in.");
         }
       }
 

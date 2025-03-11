@@ -1,23 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { X, AlertTriangle, Check } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from "react";
+import { X, AlertTriangle, Check, Info } from "lucide-react";
 
-// Wallet icons - in a real implementation you would import actual icons
-// For this example we'll use placeholders
+// Wallet icons
 const WALLET_ICONS = {
-  metamask: '/icons/metamask.svg',
-  trustwallet: '/icons/trustwallet.svg',
-  walletconnect: '/icons/walletconnect.svg',
-  coinbase: '/icons/coinbase.svg',
-  phantom: '/icons/phantom.svg',
-  brave: '/icons/brave.svg',
+  metamask: "/icons/metamask.svg",
+  trustwallet: "/icons/trustwallet.svg",
+  walletconnect: "/icons/walletconnect.svg",
+  coinbase: "/icons/coinbase.svg",
+  phantom: "/icons/phantom.svg",
 };
 
 interface WalletProviderProps {
   id: string;
   name: string;
   icon: string;
-  description: string;
+  disabled?: boolean;
   onConnect: () => Promise<void>;
 }
 
@@ -25,47 +22,49 @@ interface WalletConnectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onWalletConnected: (walletAddress: string, walletType: string) => void;
+  isVerified: boolean;
 }
 
-// Simulated Web3 connector function - replace with actual implementation
-const connectToWallet = async (walletType: string): Promise<string> => {
-  // In a real implementation, this would use ethers.js, web3.js, or similar libraries
-  // to actually connect to the specified wallet
-  
-  console.log(`Connecting to ${walletType}...`);
-  
-  // Simulate connection delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  // This would normally come from the actual wallet connection
-  const mockAddress = `0x${Array.from({length: 40}, () => 
-    Math.floor(Math.random() * 16).toString(16)).join('')}`;
-    
-  return mockAddress;
-};
-
-// Individual wallet provider component
-const WalletProvider: React.FC<WalletProviderProps> = ({ id, name, icon, description, onConnect }) => {
+// Simplified wallet provider component
+const WalletProvider: React.FC<WalletProviderProps> = ({
+  name,
+  icon,
+  disabled,
+  onConnect,
+}) => {
   return (
-    <button 
+    <button
       onClick={onConnect}
-      className="w-full flex items-center p-4 border rounded-lg hover:bg-gray-50 transition-colors mb-2"
+      disabled={disabled}
+      className={`w-full flex items-center p-3 border rounded-lg transition-colors mb-2 ${
+        disabled
+          ? "bg-gray-100 cursor-not-allowed opacity-60"
+          : "hover:bg-gray-50"
+      }`}
     >
-      <img src={icon} alt={name} className="w-10 h-10 mr-4" />
+      <img src={icon} alt={name} className="w-8 h-8 mr-3" />
       <div className="text-left">
         <h3 className="font-bold">{name}</h3>
-        <p className="text-sm text-gray-500">{description}</p>
+        {disabled && (
+          <p className="text-xs text-amber-600">Verification required</p>
+        )}
       </div>
     </button>
   );
 };
 
 // Main wallet connect modal component
-const WalletConnectModal: React.FC<WalletConnectModalProps> = ({ isOpen, onClose, onWalletConnected }) => {
+const WalletConnectModal: React.FC<WalletConnectModalProps> = ({
+  isOpen,
+  onClose,
+  onWalletConnected,
+  isVerified,
+}) => {
   const [connecting, setConnecting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
-  
+  const modalRef = useRef<HTMLDivElement>(null);
+
   // Reset states when modal is opened
   useEffect(() => {
     if (isOpen) {
@@ -74,120 +73,163 @@ const WalletConnectModal: React.FC<WalletConnectModalProps> = ({ isOpen, onClose
       setSuccess(false);
     }
   }, [isOpen]);
-  
+
+  // Handle click outside to close modal
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
+  // Connect to real wallet (to be implemented)
+  const connectToRealWallet = async (walletType: string): Promise<string> => {
+    setConnecting(walletType);
+    setError(null);
+    if (!isVerified) {
+      throw new Error("Verification required");
+    }
+
+    // Simulate connection
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    throw new Error("Wallet integration pending");
+  };
+
   // Handle wallet connection
   const handleConnect = async (walletType: string) => {
     try {
       setConnecting(walletType);
       setError(null);
-      
-      const walletAddress = await connectToWallet(walletType);
-      
+
+      if (!isVerified) {
+        throw new Error("Complete verification first");
+      }
+
+      const walletAddress = await connectToRealWallet(walletType);
       setSuccess(true);
       setConnecting(null);
-      
-      // Notify parent component of successful connection
       onWalletConnected(walletAddress, walletType);
-      
-      // Close modal after a short delay
+
       setTimeout(() => {
         onClose();
-      }, 1500);
-      
+      }, 1000);
     } catch (err) {
       setConnecting(null);
-      setError(`Failed to connect to ${walletType}. Please try again.`);
-      console.error("Wallet connection error:", err);
+      setError(err instanceof Error ? err.message : `Connection failed`);
     }
   };
-  
-  // If modal is not open, don't render anything
+
   if (!isOpen) return null;
-  
+
   const walletProviders = [
     {
-      id: 'metamask',
-      name: 'MetaMask',
+      id: "metamask",
+      name: "MetaMask",
       icon: WALLET_ICONS.metamask,
-      description: 'Connect to your MetaMask wallet',
-      onConnect: () => handleConnect('metamask')
+      disabled: !isVerified,
+      onConnect: () => handleConnect("metamask"),
     },
     {
-      id: 'trustwallet',
-      name: 'Trust Wallet',
+      id: "trustwallet",
+      name: "Trust Wallet",
       icon: WALLET_ICONS.trustwallet,
-      description: 'Connect to your Trust Wallet',
-      onConnect: () => handleConnect('trustwallet')
+      disabled: !isVerified,
+      onConnect: () => handleConnect("trustwallet"),
     },
     {
-      id: 'walletconnect',
-      name: 'WalletConnect',
-      icon: WALLET_ICONS.walletconnect, 
-      description: 'Connect to multiple wallet types',
-      onConnect: () => handleConnect('walletconnect')
+      id: "walletconnect",
+      name: "WalletConnect",
+      icon: WALLET_ICONS.walletconnect,
+      disabled: !isVerified,
+      onConnect: () => handleConnect("walletconnect"),
     },
     {
-      id: 'coinbase',
-      name: 'Coinbase Wallet',
+      id: "coinbase",
+      name: "Coinbase Wallet",
       icon: WALLET_ICONS.coinbase,
-      description: 'Connect to your Coinbase Wallet',
-      onConnect: () => handleConnect('coinbase')
+      disabled: !isVerified,
+      onConnect: () => handleConnect("coinbase"),
     },
     {
-      id: 'phantom',
-      name: 'Phantom',
+      id: "phantom",
+      name: "Phantom",
       icon: WALLET_ICONS.phantom,
-      description: 'Connect to your Phantom wallet',
-      onConnect: () => handleConnect('phantom')
-    }
+      disabled: !isVerified,
+      onConnect: () => handleConnect("phantom"),
+    },
   ];
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+      <div
+        ref={modalRef}
+        className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-96 flex flex-col"
+      >
         {/* Modal Header */}
-        <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-bold">Connect Wallet</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full">
+        <div className="flex justify-between items-center p-3 border-b">
+          <h2 className="text-lg font-bold">Connect Wallet</h2>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded-full"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
-        
-        {/* Modal Content */}
-        <div className="p-4">
+
+        {/* Modal Content - Scrollable */}
+        <div className="p-3 overflow-y-auto flex-grow">
+          {!isVerified && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 mb-3 flex items-start">
+              <Info className="h-4 w-4 text-amber-500 mr-2 flex-shrink-0 mt-0.5" />
+              <p className="text-amber-700 text-sm">
+                Verification required before connecting wallet.
+              </p>
+            </div>
+          )}
+
           {success ? (
-            <div className="flex flex-col items-center justify-center py-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                <Check className="h-8 w-8 text-green-500" />
+            <div className="flex flex-col items-center justify-center py-4">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                <Check className="h-6 w-6 text-green-500" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Wallet Connected</h3>
-              <p className="text-center text-gray-600">Your wallet has been successfully connected.</p>
+              <h3 className="text-lg font-bold mb-1">Wallet Connected</h3>
             </div>
           ) : error ? (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 flex items-start">
-              <AlertTriangle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
-              <p className="text-red-600">{error}</p>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-2 mb-3 flex items-start">
+              <AlertTriangle className="h-4 w-4 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+              <p className="text-red-600 text-sm">{error}</p>
             </div>
           ) : connecting ? (
-            <div className="flex flex-col items-center justify-center py-6">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
-              <h3 className="text-xl font-bold mb-2">Connecting...</h3>
-              <p className="text-center text-gray-600">Please approve the connection in your wallet.</p>
+            <div className="flex flex-col items-center justify-center py-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-3"></div>
+              <h3 className="text-lg font-bold mb-1">Connecting...</h3>
             </div>
           ) : (
             <>
-              <p className="text-gray-600 mb-4">
-                Connect with one of our available wallet providers or create a new one.
+              <p className="text-gray-600 text-sm mb-3">
+                Connect your existing wallet. Only connect wallets you own.
               </p>
-              
+
               <div className="space-y-2">
-                {walletProviders.map(provider => (
+                {walletProviders.map((provider) => (
                   <WalletProvider key={provider.id} {...provider} />
                 ))}
               </div>
-              
-              <p className="text-sm text-gray-500 mt-4">
-                By connecting your wallet, you agree to our Terms of Service and Privacy Policy.
+
+              <p className="text-xs text-gray-500 mt-3">
+                By connecting, you agree to our Terms of Service.
               </p>
             </>
           )}
@@ -197,54 +239,42 @@ const WalletConnectModal: React.FC<WalletConnectModalProps> = ({ isOpen, onClose
   );
 };
 
-// Main component to be exported and used in DashboardNav
+// Main hook to be exported
 const useWalletConnect = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [connectedWallet, setConnectedWallet] = useState<{
     address: string;
     type: string;
   } | null>(null);
-  
-  // Open wallet connect modal
-  const openWalletModal = () => {
-    setModalOpen(true);
-  };
-  
-  // Close wallet connect modal
-  const closeWalletModal = () => {
-    setModalOpen(false);
-  };
-  
-  // Handle successful wallet connection
+  const [isVerified] = useState(false);
+
+  const openWalletModal = () => setModalOpen(true);
+  const closeWalletModal = () => setModalOpen(false);
+
   const handleWalletConnected = (address: string, type: string) => {
     setConnectedWallet({ address, type });
-    
-    // Here you could dispatch to a global state or use React Context
-    // to make the wallet information available throughout the app
-    
-    console.log(`Wallet connected: ${type} - ${address}`);
   };
-  
-  // Disconnect wallet
+
   const disconnectWallet = () => {
     setConnectedWallet(null);
-    console.log("Wallet disconnected");
   };
-  
+
   return {
     isModalOpen,
     connectedWallet,
+    isVerified,
     openWalletModal,
     closeWalletModal,
     handleWalletConnected,
     disconnectWallet,
     WalletConnectModal: () => (
-      <WalletConnectModal 
-        isOpen={isModalOpen} 
-        onClose={closeWalletModal} 
+      <WalletConnectModal
+        isOpen={isModalOpen}
+        onClose={closeWalletModal}
         onWalletConnected={handleWalletConnected}
+        isVerified={isVerified}
       />
-    )
+    ),
   };
 };
 

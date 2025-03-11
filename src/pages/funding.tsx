@@ -1,8 +1,8 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/Card";
 import { Wallet, Copy, Check } from "lucide-react";
 import DashboardNav from "../components/DashboardNav";
-import { BalanceContext, Transaction } from "../components/balance/BalanceContext";
+import { BalanceContext } from "../components/balance/BalanceContext";
 
 interface DepositMethod {
   name: string;
@@ -33,7 +33,7 @@ const FundingPage: React.FC = () => {
   const { 
     balance, 
     createDeposit, 
-    transactions,
+    
     getRecentTransactions 
   } = useContext(BalanceContext);
 

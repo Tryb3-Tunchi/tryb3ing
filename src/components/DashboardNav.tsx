@@ -31,8 +31,9 @@ const DashboardNav: React.FC = () => {
   const getDisplayedBalance = () => {
     if (balances && balances.length > 0) {
       const displayBalance = isAccountReal
-        ? balances.find((b) => b.currency === "USD") || balances[0]
+        ? balances.find((b) => b.currency === "USD") || balances[0] // Default to first balance if USD not found
         : balances.find((b) => b.currency === "DEMO") || balances[0];
+        // : balances.find((b) => b.currency === "DEMO") || balances[0];
 
       return `$${parseFloat(displayBalance.amount).toFixed(2)}`;
     }

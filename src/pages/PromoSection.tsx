@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Gift, Trophy, Users, BookOpen, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 

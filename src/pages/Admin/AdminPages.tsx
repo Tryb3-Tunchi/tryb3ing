@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "../../components/Card";
 import { Input } from "../../components/Card";
-import { Button } from "../../components/Card";
+// import { Button } from "../../components/Card";
 
 interface Transaction {
   id: string;
@@ -325,13 +325,13 @@ const AdminDashboard = () => {
                         />
                       </div>
                       <div className="flex space-x-4">
-                        <Button
+                        <button
                           onClick={() => handleTransaction("credit")}
                           className="flex items-center space-x-2"
                         >
                           <ArrowUpRight size={20} />
                           <span>Credit</span>
-                        </Button>
+                        </button>
                         <button
                           onClick={() => handleTransaction("debit")}
                           className="flex items-center space-x-2"

@@ -30,8 +30,8 @@ const AccountOverview = () => {
     demo: {
       type: "Demo Account",
       accountNumber: "987654321",
-      balance: 0,
-      profit: 0, // Placeholder for profit/loss
+      balance: 10000,
+      profit: 100, // Placeholder for profit/loss
       currency: "USD",
       accountStyle: "Practice",
     },
@@ -130,7 +130,7 @@ const AccountOverview = () => {
       {/* Header */}
       <div className="my-16 font-semibold text-center border-b-4 pb-10">
         <p className="text-2xl font-bold py-4">
-          Verify your account now to start trading
+          Verify your account for full features
         </p>
         <Link to="/verify">
           <button className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold">

@@ -1,61 +1,242 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "../components/Card";
-import {
-  ArrowUp,
-  ArrowDown,
- 
-} from "lucide-react";
+import { ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
 import DashboardNav from "../components/DashboardNav";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
-const MarketDashboard = () => {
-  const [prices, setPrices] = useState({
-    EURUSD: 1.03141,
-    BTCUSD: 96763.08,
-    USDJPY: 157.085,
-    GOLD: 2640.99,
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+interface PriceData {
+  price: number;
+  change: number;
+}
+
+interface MarketPrices {
+  EURUSD: PriceData;
+  BTCUSD: PriceData;
+  USDJPY: PriceData;
+  GOLD: PriceData;
+  [key: string]: PriceData;
+}
+
+interface NewsItem {
+  title: string;
+  source: string;
+  url: string;
+  publishedAt: string;
+}
+
+const MarketDashboard: React.FC = () => {
+  const [prices, setPrices] = useState<MarketPrices>({
+    EURUSD: { price: 0, change: 0 },
+    BTCUSD: { price: 0, change: 0 },
+    USDJPY: { price: 0, change: 0 },
+    GOLD: { price: 0, change: 0 },
   });
+  const [loading, setLoading] = useState<boolean>(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [chartData, setChartData] = useState<any>(null);
 
-  // Simulate live price updates
+  // Fetch market data using publicly accessible APIs
+  const fetchMarketData = async (): Promise<void> => {
+    setLoading(true);
+    try {
+      // For BTC price, we'll use CoinGecko's public API
+      const btcResponse = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true"
+      );
+      const btcData = await btcResponse.json();
+
+      // For demo purposes, we'll use simulated data for other pairs
+      // In a production app, you would use authenticated API calls
+      const updatedPrices: MarketPrices = {
+        BTCUSD: {
+          price: btcData.bitcoin.usd,
+          change: btcData.bitcoin.usd_24h_change,
+        },
+        EURUSD: { 
+          price: 1.0876, 
+          change: -0.12 
+        },
+        USDJPY: { 
+          price: 113.25, 
+          change: 0.35 
+        },
+        GOLD: { 
+          price: 2253.80, 
+          change: 0.65 
+        },
+      };
+      
+      setPrices(updatedPrices);
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error("Error fetching market data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch historical data for the chart
+  const fetchChartData = async (): Promise<void> => {
+    try {
+      // Using CoinGecko's free API for historical BTC prices
+      const response = await fetch(
+        "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=30&interval=daily"
+      );
+      const data = await response.json();
+      
+      // CoinGecko returns price data as [timestamp, price] pairs
+      const prices = data.prices;
+      
+      // Format the data for Chart.js
+      const chartLabels = prices.map((item: [number, number]) => 
+        new Date(item[0]).toLocaleDateString()
+      );
+      
+      const chartPrices = prices.map((item: [number, number]) => item[1]);
+
+      setChartData({
+        labels: chartLabels,
+        datasets: [
+          {
+            label: "BTC/USD Price",
+            data: chartPrices,
+            borderColor: "rgba(75, 192, 192, 1)",
+            fill: false,
+          },
+        ],
+      });
+    } catch (error) {
+      console.error("Error fetching chart data:", error);
+    }
+  };
+
+  // Fetch latest financial news
+  const fetchLatestNews = async (): Promise<void> => {
+    try {
+      // For demo purposes, we'll use mock news data
+      // In a production app, you would integrate with a news API
+      const mockNews: NewsItem[] = [
+        {
+          title: "Bitcoin surpasses $60,000 as institutional adoption grows",
+          source: "Crypto News",
+          url: "#",
+          publishedAt: "2025-03-11T08:30:00Z"
+        },
+        {
+          title: "Fed signals potential rate cuts in upcoming meeting",
+          source: "Financial Times",
+          url: "#",
+          publishedAt: "2025-03-10T22:15:00Z"
+        },
+        {
+          title: "Gold reaches new all-time high amid market uncertainty",
+          source: "Market Watch",
+          url: "#",
+          publishedAt: "2025-03-10T16:45:00Z"
+        },
+        {
+          title: "Japanese yen weakens as Bank of Japan maintains policy",
+          source: "Reuters",
+          url: "#",
+          publishedAt: "2025-03-10T10:20:00Z"
+        }
+      ];
+      
+      setNews(mockNews);
+    } catch (error) {
+      console.error("Error fetching news:", error);
+    }
+  };
+
+  // Initial data load
+  useEffect(() => {
+    fetchMarketData();
+    fetchChartData();
+    fetchLatestNews();
+  }, []);
+
+  // Set up periodic data refresh
   useEffect(() => {
     const interval = setInterval(() => {
-      setPrices((prev) => ({
-        EURUSD: prev.EURUSD + (Math.random() - 0.5) * 0.001,
-        BTCUSD: prev.BTCUSD + (Math.random() - 0.5) * 10,
-        USDJPY: prev.USDJPY + (Math.random() - 0.5) * 0.1,
-        GOLD: prev.GOLD + (Math.random() - 0.5) * 1,
-      }));
-    }, 2000);
+      fetchMarketData();
+    }, 60000); // Refresh every 60 seconds
 
     return () => clearInterval(interval);
   }, []);
 
+  const formatPrice = (symbol: string, price: number): string => {
+    if (symbol === "BTCUSD") return price.toFixed(2);
+    if (symbol === "GOLD") return price.toFixed(2);
+    if (symbol === "USDJPY") return price.toFixed(2);
+    return price.toFixed(4);
+  };
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleString();
+  };
+
   return (
     <>
-      {" "}
       <DashboardNav />
       <div className="max-w-6xl mx-auto p-4">
-        {/* Top Tickers */}
-        <div className="grid grid-cols-1 pt-20 md:grid-cols-4 gap-4 mb-6">
-          {Object.entries(prices).map(([symbol, price]) => (
-            <Card
-              key={symbol}
-              className="bg-white hover:shadow-md transition-shadow"
+        <div className="flex justify-between items-center pt-20 mb-4">
+          <h1 className="text-2xl font-bold">Market Dashboard</h1>
+          <div className="flex items-center text-sm text-gray-500">
+            <span className="mr-2">
+              Last updated: {lastUpdated ? lastUpdated.toLocaleTimeString() : "Loading..."}
+            </span>
+            <button
+              onClick={fetchMarketData}
+              disabled={loading}
+              className="flex items-center p-1 hover:bg-gray-100 rounded-full"
             >
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            </button>
+          </div>
+        </div>
+
+        {/* Top Tickers */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          {Object.entries(prices).map(([symbol, data]) => (
+            <Card key={symbol} className="bg-white hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-2">
                   <span className="font-bold">{symbol}</span>
-                  {Math.random() > 0.5 ? (
+                  {data.change > 0 ? (
                     <span className="text-green-500 flex items-center">
-                      <ArrowUp size={16} />+{(Math.random() * 2).toFixed(2)}%
+                      <ArrowUp size={16} />+{Math.abs(data.change).toFixed(2)}%
                     </span>
                   ) : (
                     <span className="text-red-500 flex items-center">
-                      <ArrowDown size={16} />-{(Math.random() * 2).toFixed(2)}%
+                      <ArrowDown size={16} />-{Math.abs(data.change).toFixed(2)}%
                     </span>
                   )}
                 </div>
                 <div className="text-2xl font-semibold mb-1">
-                  {price.toFixed(symbol === "BTCUSD" ? 2 : 5)}
+                  {formatPrice(symbol, data.price)}
                 </div>
                 <div className="text-sm text-gray-500">1D change</div>
               </CardContent>
@@ -63,126 +244,37 @@ const MarketDashboard = () => {
           ))}
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {/* Market Analysis */}
-          <div className="md:col-span-2">
-            <Card className="mb-6">
-              <CardContent>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold">Market Summary</h2>
-                  <div className="flex space-x-2">
-                    {["1D", "1M", "3M", "1Y", "All"].map((period) => (
-                      <button
-                        key={period}
-                        className={`px-3 py-1 rounded ${
-                          period === "1D"
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-100"
-                        }`}
-                      >
-                        {period}
-                      </button>
-                    ))}
+        {/* Chart */}
+        <Card className="mb-6">
+          <CardContent>
+            <h2 className="text-xl font-bold mb-4">BTC/USD Price Chart</h2>
+            {chartData ? (
+              <Line data={chartData} />
+            ) : (
+              <div className="flex justify-center py-8">
+                <RefreshCw size={24} className="animate-spin text-gray-400" />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Latest News */}
+        <Card className="mb-6">
+          <CardContent>
+            <h2 className="text-xl font-bold mb-4">Latest Market News</h2>
+            <div className="divide-y">
+              {news.map((item, index) => (
+                <div key={index} className="py-3">
+                  <h3 className="font-semibold">{item.title}</h3>
+                  <div className="flex justify-between text-sm text-gray-500 mt-1">
+                    <span>{item.source}</span>
+                    <span>{formatDate(item.publishedAt)}</span>
                   </div>
                 </div>
-                <div className="space-y-4">
-                  {[
-                    {
-                      pair: "EURUSD",
-                      name: "Euro vs US Dollar",
-                      price: 1.03141,
-                      change: -0.32,
-                    },
-                    {
-                      pair: "GBPUSD",
-                      name: "Great Britain Pound vs US Dollar",
-                      price: 1.24124,
-                      change: -0.84,
-                    },
-                    {
-                      pair: "USDJPY",
-                      name: "US Dollar vs Japanese Yen",
-                      price: 157.085,
-                      change: -0.17,
-                    },
-                  ].map((item) => (
-                    <div
-                      key={item.pair}
-                      className="flex items-center justify-between p-2 hover:bg-gray-50 rounded"
-                    >
-                      <div>
-                        <div className="font-semibold">{item.pair}</div>
-                        <div className="text-sm text-gray-500">{item.name}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-semibold">{item.price}</div>
-                        <div
-                          className={`text-sm ${
-                            item.change > 0 ? "text-green-500" : "text-red-500"
-                          }`}
-                        >
-                          {item.change}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Latest News */}
-            <Card>
-              <CardContent>
-                <h2 className="text-xl font-bold mb-4">Latest Headlines</h2>
-                {[
-                  "Argentina's agro export revenue up 58% in...",
-                  "World shares start 2025 with a wobble on Trump...",
-                  "Tennis-Djokovic continues Monfils...",
-                ].map((headline, index) => (
-                  <div key={index} className="border-b last:border-0 py-3">
-                    <div className="flex items-center text-sm text-gray-500 mb-1">
-                      <span className="mr-2">Reuters</span>
-                      <span>1 week ago</span>
-                    </div>
-                    <div className="font-medium hover:text-blue-500 cursor-pointer">
-                      {headline}
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Market Sentiment */}
-          <div>
-            <Card>
-              <CardContent>
-                <h2 className="text-xl font-bold mb-4">Market Sentiment</h2>
-                {[
-                  { symbol: "EURUSD", buy: 82, sell: 18 },
-                  { symbol: "USDJPY", buy: 47, sell: 53 },
-                  { symbol: "GOLD", buy: 39, sell: 61 },
-                ].map((item) => (
-                  <div key={item.symbol} className="mb-4">
-                    <div className="flex justify-between mb-1">
-                      <span className="font-medium">{item.symbol}</span>
-                      <div className="flex space-x-4">
-                        <span className="text-green-500">{item.buy}%</span>
-                        <span className="text-red-500">{item.sell}%</span>
-                      </div>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-green-500"
-                        style={{ width: `${item.buy}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </>
   );

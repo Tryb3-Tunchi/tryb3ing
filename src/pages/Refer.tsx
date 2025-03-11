@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { Card, CardContent } from "../components/Card";
 import { Button } from "../components/Card";
 import {  Wallet, History, Gift,  } from "lucide-react";
@@ -78,7 +78,7 @@ const ReferFriendPage = () => {
                   {/* Year Selector */}
                   <div className="flex flex-wrap gap-2 mb-6">
                     {years.map((year) => (
-                      <Button
+                      <button
                         key={year}
                         className={`${
                           selectedYear === year
@@ -88,7 +88,7 @@ const ReferFriendPage = () => {
                         onClick={() => setSelectedYear(year)}
                       >
                         {year}
-                      </Button>
+                      </button>
                     ))}
                   </div>
 

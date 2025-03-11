@@ -102,9 +102,7 @@ const Cards = () => {
                   <img
                     src={card.image}
                     alt={card.title}
-                    layout="fill"
-                    objectFit="contain"
-                    className="opacity-80"
+                    className="opacity-80 w-full h-full object-contain"
                   />
                 </div>
               </div>
@@ -156,8 +154,7 @@ const Cards = () => {
               <img
                 src="/app-preview.png"
                 alt="XM App Preview"
-                layout="fill"
-                objectFit="contain"
+                className="w-full h-full object-contain"
               />
             </div>
           </div>

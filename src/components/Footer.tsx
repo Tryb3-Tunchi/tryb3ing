@@ -9,7 +9,7 @@ export default function Footer (){
 
     return (
         <div className=" text-black py-8 font-montserrat mt-20 shadow-lg bg-gray-50">
-           <div className="lg:flex-row flex flex-col lg:p-12 lg:m-0 m-8 lg:space-y-0 lg:space-y-6 space-y-3 lg:justify-between sm:items-center sm:justify-center">
+           <div className="lg:flex-row flex flex-col lg:p-12 lg:m-0 m-8 lg:space-y-0 md:space-y-6 space-y-3 lg:justify-between sm:items-center sm:justify-center">
   <p className="text-2xl font-bold text-center">Investment</p>
 
   <div className='lg:flex lg:flex-col flex flex-row lg:space-y-3 lg:mr-20 mx-auto'>
