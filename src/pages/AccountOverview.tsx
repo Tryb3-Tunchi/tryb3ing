@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { MoreVertical, Download, Upload, Plus } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import { BalanceContext } from "../components/balance/BalanceContext"; // Import the BalanceContext
 // import apiService from "../components/Api/apiService"; // Import the apiService
 
@@ -129,9 +129,16 @@ const AccountOverview = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl  mx-auto mt-20 px-4 py-8">
       {/* Header */}
-      <div className="my-16 font-semibold text-center border-b-4 pb-10">
+      <div className="mb-8">
+        <h1 className="text-4xl text-blue-600 font-extrabold ">Welcome!</h1>
+        {/* <p className="text-gray-600">
+          Manage your trading accounts and balances with ease.
+        </p> */}
+      </div>
+      {/* Verify Account Section */}
+      {/* <div className="my-16 font-semibold text-center border-b-4 pb-10">
         <p className="text-2xl font-bold py-4">
           Verify your account for full features
         </p>
@@ -140,10 +147,10 @@ const AccountOverview = () => {
             Verify Now
           </button>
         </Link>
-      </div>
+      </div> */}
 
       {/* Account Overview Section */}
-      <div className="mb-8">
+      <div className="my-8">
         <h1 className="text-2xl font-bold mb-2">Accounts Overview</h1>
         <p className="text-gray-600">
           Stay informed and manage your account with ease via the Account
