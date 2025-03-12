@@ -1,12 +1,22 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/Card";
 import { Wallet, Copy, Check } from "lucide-react";
 import DashboardNav from "../components/DashboardNav";
 import { BalanceContext } from "../components/balance/BalanceContext";
+import apiService from "../components/Api/apiService";
 
 interface DepositMethod {
   name: string;
   verified: boolean;
+}
+
+interface PendingDeposit {
+  id: string;
+  amount: number;
+  method: string;
+  cryptoType?: string;
+  status: "pending" | "approved" | "rejected";
+  createdAt: string;
 }
 
 interface CryptoWallet {
@@ -22,6 +32,7 @@ const FundingPage: React.FC = () => {
   const [depositAmount, setDepositAmount] = useState<number>(200);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [copiedAddress, setCopiedAddress] = useState<string>("");
+  const [pendingDeposits, setPendingDeposits] = useState<PendingDeposit[]>([]);
   const [message, setMessage] = useState<{
     text: string;
     type: "success" | "error";
@@ -29,31 +40,68 @@ const FundingPage: React.FC = () => {
     text: "",
     type: "success",
   });
-  
-  const { 
-    balance, 
-    createDeposit, 
-    
-    getRecentTransactions 
+
+  const {
+    balance,
+    // createDeposit,
+    // getRecentTransactions,
+    // refreshBalances, // Add refreshBalances from context
   } = useContext(BalanceContext);
 
-  // Get processing deposits (now from the context)
-  const processingDeposits = getRecentTransactions().filter(
-    tx => tx.type === "deposit" && tx.status === "processing"
-  );
+  // Get processing deposits (from the context)
+  // const processingDeposits = getRecentTransactions().filter(
+  //   (tx) => tx.type === "deposit" && tx.status === "processing"
+  // );
 
   const cryptoWallets: CryptoWallet[] = [
     { name: "USDT", address: "TSyDhPPK2ynXmNgFxYsUG4JBy5Yg4b34Y" },
     { name: "USDC", address: "0x4af06993248310599558167ad3597A018f53A7a7" },
     { name: "BTC", address: "bc1q5qhm53rjqvewj9lzexnu6k8m8sdydm7sz9m0rk" },
     { name: "ETH", address: "0x4af06993248310599558167ad3597A018f53A7a7" },
-    { name: "XRP", address: "0x4af06993248310599558167ad3597A018f53A7a7" }
+    { name: "XRP", address: "0x4af06993248310599558167ad3597A018f53A7a7" },
   ];
+
+  // Load pending deposits on component mount
+  useEffect(() => {
+    const fetchDeposits = async () => {
+      try {
+        setIsLoading(true);
+        // Get deposits from API
+        const deposits = await apiService.getDeposits();
+        
+        // Convert API response to our format if needed
+        const pendingDeposits: PendingDeposit[] = Array.isArray(deposits)
+          ? deposits.map((d) => ({
+              id: d.id?.toString() || Math.random().toString(36).substring(7),
+              amount: parseFloat(d.amount || "0"),
+              method: d.method || "Bank Transfer",
+              cryptoType: d.cryptoType,
+              status: (d.status as "pending" | "approved" | "rejected") || "pending",
+              createdAt: d.timestamp || new Date().toISOString(),
+            }))
+          : [];
+        
+        setPendingDeposits(pendingDeposits);
+      } catch (err) {
+        console.error("Failed to load deposits:", err);
+        setMessage({
+          text: "Failed to load pending deposits. Please refresh the page.",
+          type: "error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchDeposits();
+  }, []);
+
+ 
 
   const handleMethodSelect = (method: string) => {
     setSelectedMethod(method);
     setMessage({ text: "", type: "success" });
-    
+
     if (method === "Cryptocurrency") {
       setShowCryptoOptions(true);
       setShowDepositForm(false);
@@ -70,12 +118,13 @@ const FundingPage: React.FC = () => {
   };
 
   const copyToClipboard = (address: string) => {
-    navigator.clipboard.writeText(address)
+    navigator.clipboard
+      .writeText(address)
       .then(() => {
         setCopiedAddress(address);
         setTimeout(() => setCopiedAddress(""), 3000);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Failed to copy: ", err);
         setMessage({
           text: "Failed to copy address to clipboard",
@@ -95,20 +144,38 @@ const FundingPage: React.FC = () => {
         throw new Error("Minimum deposit amount is 200 USD");
       }
 
-      // Create the deposit using the context function
-      // Now with method and cryptoType parameters
-      const response = await createDeposit(
-        depositAmount, 
-        selectedMethod,
-        selectedMethod === "Cryptocurrency" ? selectedCrypto : undefined
-      );
+      // Create a deposit request
+      const depositData = {
+        amount: depositAmount,
+        method: selectedMethod,
+        cryptoType: selectedMethod === "Cryptocurrency" ? selectedCrypto : undefined,
+        status: "pending",
+      };
 
-      const cryptoMessage = selectedMethod === "Cryptocurrency" 
-        ? ` via ${selectedCrypto}` 
-        : "";
+      // Call API service to create the deposit
+      const response = await apiService.createDeposit(depositData);
+
+      // Generate a random ID if the API doesn't return one
+      const depositId = response?.id?.toString() || Math.random().toString(36).substring(7);
+
+      // Add to local state
+      const newDeposit: PendingDeposit = {
+        id: depositId,
+        amount: depositAmount,
+        method: selectedMethod,
+        cryptoType: selectedMethod === "Cryptocurrency" ? selectedCrypto : undefined,
+        status: "pending",
+        createdAt: new Date().toISOString(),
+      };
+
+      setPendingDeposits((prev) => [...prev, newDeposit]);
+
+      // Show success message
+      const cryptoMessage =
+        selectedMethod === "Cryptocurrency" ? ` via ${selectedCrypto}` : "";
 
       setMessage({
-        text: `Your deposit of $${depositAmount}${cryptoMessage} is being processed. Reference ID: ${response.transaction.id}`,
+        text: `Your deposit of $${depositAmount}${cryptoMessage} is being processed. Reference ID: ${depositId}`,
         type: "success",
       });
 
@@ -116,12 +183,16 @@ const FundingPage: React.FC = () => {
       setDepositAmount(200);
       setShowDepositForm(false);
       setShowCryptoOptions(false);
+
+      // Refresh balance to show updated balance
+      // await refreshBalances();
     } catch (error) {
       console.error("Deposit failed:", error);
       setMessage({
-        text: error instanceof Error
-          ? error.message
-          : "Failed to process your deposit. Please try again.",
+        text:
+          error instanceof Error
+            ? error.message
+            : "Failed to process your deposit. Please try again.",
         type: "error",
       });
     } finally {
@@ -130,8 +201,8 @@ const FundingPage: React.FC = () => {
   };
 
   const fundingOptions: string[] = [
-    "Deposits",
-    "Withdrawals",
+    "Deposits ",
+    "Withdrawals  (Verified clients only)",
     "Internal Transfer",
     "Transactions History",
   ];
@@ -139,20 +210,20 @@ const FundingPage: React.FC = () => {
   const depositMethods: DepositMethod[] = [
     { name: "Cryptocurrency", verified: false },
     { name: "Stocks", verified: false },
-    { name: "Bank Wire Transfer", verified: false },
+    { name: "Bank Wire Transfer", verified: true },
     { name: "Credit/Debit Cards", verified: true },
     { name: "Online Bank Transfer", verified: true },
   ];
 
   const getCurrentWalletAddress = () => {
-    const wallet = cryptoWallets.find(w => w.name === selectedCrypto);
+    const wallet = cryptoWallets.find((w) => w.name === selectedCrypto);
     return wallet ? wallet.address : "";
   };
 
   return (
     <>
       <DashboardNav />
-      <div className="w-full max-w-6xl mt-20 mx-auto p-4 space-y-6">
+      <div className="w-full max-w-6xl mt-24 mx-auto p-4 space-y-6">
         {/* Account Balance Section */}
         <Card className="bg-white rounded-xl shadow-sm">
           <CardHeader>
@@ -173,14 +244,14 @@ const FundingPage: React.FC = () => {
         </Card>
 
         {/* Processing Deposits Section */}
-        {processingDeposits.length > 0 && (
+        {pendingDeposits.length > 0 && (
           <Card className="bg-white rounded-xl shadow-sm">
             <CardHeader>
-              <CardTitle>Processing Deposits</CardTitle>
+              <CardTitle>Pending Deposits</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <ul className="space-y-4">
-                {processingDeposits.map((deposit) => (
+                {pendingDeposits.map((deposit) => (
                   <li key={deposit.id} className="p-4 border rounded-lg">
                     <div className="flex justify-between items-start">
                       <div>
@@ -189,17 +260,22 @@ const FundingPage: React.FC = () => {
                         </p>
                         <p className="text-lg font-bold">
                           ${deposit.amount.toFixed(2)} ({deposit.method}
-                          {deposit.cryptoType ? ` - ${deposit.cryptoType}` : ""})
+                          {deposit.cryptoType ? ` - ${deposit.cryptoType}` : ""}
+                          )
                         </p>
                         <p className="text-xs text-gray-500">
-                          {deposit.timestamp.toLocaleString()}
+                          {new Date(deposit.createdAt).toLocaleString()}
                         </p>
                       </div>
-                      <p className={`text-sm px-2 py-1 rounded ${
-                        deposit.status === "processing"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-green-100 text-green-800"
-                      }`}>
+                      <p
+                        className={`text-sm px-2 py-1 rounded ${
+                          deposit.status === "pending"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : deposit.status === "approved"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
                         {deposit.status}
                       </p>
                     </div>
@@ -285,8 +361,8 @@ const FundingPage: React.FC = () => {
               <p className="mb-4 text-gray-600">
                 Please select the cryptocurrency you would like to deposit:
               </p>
-              
-              <ul className="space-y-2 mb-6">
+
+              <ul className="space-y-2 text-xl mb-6">
                 {cryptoWallets.map((wallet) => (
                   <li key={wallet.name}>
                     <button
@@ -299,7 +375,7 @@ const FundingPage: React.FC = () => {
                   </li>
                 ))}
               </ul>
-              
+
               <button
                 className="text-blue-500 hover:text-blue-700"
                 onClick={() => {
@@ -317,9 +393,10 @@ const FundingPage: React.FC = () => {
             <CardContent className="p-8">
               <h2 className="text-xl font-bold mb-6">
                 Before you proceed with a deposit via {selectedMethod}
-                {selectedCrypto ? ` (${selectedCrypto})` : ""}, please note the following:
+                {selectedCrypto ? ` (${selectedCrypto})` : ""}, please note the
+                following:
               </h2>
-              
+
               {message.text && (
                 <div
                   className={`p-4 mb-4 rounded-lg ${
@@ -334,11 +411,15 @@ const FundingPage: React.FC = () => {
 
               {selectedMethod === "Cryptocurrency" && (
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="font-bold mb-2">{selectedCrypto} Deposit Address:</h3>
-                  <div className="flex items-center justify-between p-3 bg-white border rounded-lg">
-                    <code className="text-sm break-all">{getCurrentWalletAddress()}</code>
-                    <button 
-                      className="ml-2 p-1 text-blue-500 hover:text-blue-700" 
+                  <h3 className="font-bold mb-2">
+                    {selectedCrypto} Deposit Address:
+                  </h3>
+                  <div className="flex items-center  justify-between p-3 bg-white border rounded-lg">
+                    <code className="font-bold text-2xl break-all">
+                      {getCurrentWalletAddress()}
+                    </code>
+                    <button
+                      className="ml-2 p-1 text-blue-500 hover:text-blue-700"
                       onClick={() => copyToClipboard(getCurrentWalletAddress())}
                     >
                       {copiedAddress === getCurrentWalletAddress() ? (
@@ -349,36 +430,45 @@ const FundingPage: React.FC = () => {
                     </button>
                   </div>
                   <p className="mt-2 text-sm text-gray-600">
-                    Send only {selectedCrypto} to this address. Sending any other cryptocurrency may result in permanent loss.
+                    Send only {selectedCrypto} to this address. Sending any
+                    other cryptocurrency may result in permanent loss.
                   </p>
                 </div>
               )}
 
               <ul className="space-y-4 mb-8 list-disc pl-6">
                 <li>
-                  Please ensure all payments are made from an account registered in the same name as your trading account.
+                  Please ensure all payments are made from an account registered
+                  in the same name as your trading account.
                 </li>
                 {selectedMethod === "Cryptocurrency" ? (
                   <>
                     <li>
-                      Cryptocurrency deposits typically require 1-6 network confirmations before they are credited to your account.
+                      Cryptocurrency deposits typically require 1-6 network
+                      confirmations before they are credited to your account.
                     </li>
                     <li>
-                      The USD value will be calculated based on the exchange rate at the time your deposit is received.
+                      The USD value will be calculated based on the exchange
+                      rate at the time your deposit is received.
                     </li>
                   </>
                 ) : (
                   <>
                     <li>
-                      All withdrawals, excluding profits, can only be paid back to the original payment method, up to the deposited amount.
+                      All withdrawals, excluding profits, can only be paid back
+                      to the original payment method, up to the deposited
+                      amount.
                     </li>
                     <li>
-                      We do not charge any commissions or fees for deposits via {selectedMethod}.
+                      We do not charge any commissions or fees for deposits via{" "}
+                      {selectedMethod}.
                     </li>
                   </>
                 )}
                 <li>
-                  By submitting a deposit request, you consent to your data being shared with third parties as necessary to process your payment.
+                  By submitting a deposit request, you consent to your data
+                  being shared with third parties as necessary to process your
+                  payment.
                 </li>
               </ul>
 
@@ -387,16 +477,18 @@ const FundingPage: React.FC = () => {
                   Deposit Funds - {selectedMethod}
                   {selectedCrypto ? ` (${selectedCrypto})` : ""}
                 </h3>
-                
+
                 <p className="mb-4">
                   Please enter the amount you wish to deposit to your account.
                 </p>
-                
+
                 <div className="text-sm text-gray-600 mb-4">
                   <p>Minimum deposit 200 USD</p>
-                  <p>Remaining Deposit Limit for Non-Verified Account 2500 USD</p>
+                  <p>
+                    Remaining Deposit Limit for Non-Verified Account 2500 USD
+                  </p>
                 </div>
-                
+
                 <form onSubmit={handleDepositSubmit} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -407,7 +499,9 @@ const FundingPage: React.FC = () => {
                       min="200"
                       step="any"
                       value={depositAmount}
-                      onChange={(e) => setDepositAmount(parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        setDepositAmount(parseFloat(e.target.value) || 0)
+                      }
                       className="w-full p-2 border rounded-md"
                       required
                     />

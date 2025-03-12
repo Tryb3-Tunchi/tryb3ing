@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   User,
   FileText,
@@ -12,17 +12,39 @@ import { Button } from "../components/Card";
 import { Alert, AlertTitle, AlertDescription } from "../components/Card";
 import DashboardNav from "../components/DashboardNav";
 import { Link } from "react-router-dom";
+import apiService from "../components/Api/apiService"; // Import the API service
+
+// Define the structure of the profile data
+interface ProfileData {
+  fullName: string;
+  address: string;
+  dob: string;
+  country: string;
+  email: string;
+  phone: string;
+  new_first_name: string;
+  new_last_name: string;
+  new_phone_number: string;
+  password: string;
+}
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("Profile");
-  const [formData, setFormData] = useState({
-    fullName: "josh leon",
-    address: "20, 20 Fatai Atere Way, Lagos, Nigeria",
-    dob: "1990-11-11",
-    country: "Nigeria",
-    email: "new4mails@exdonuts.com",
-    phone: "+2347082227836",
+  const [formData, setFormData] = useState<ProfileData>({
+    fullName: "",
+    address: "",
+    dob: "",
+    country: "",
+    email: "",
+    phone: "",
+    new_first_name: "",
+    new_last_name: "",
+    new_phone_number: "",
+    password: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const sidebarItems = [
     { icon: User, path: "/profile", label: "Profile" },
@@ -33,21 +55,86 @@ const ProfilePage = () => {
     { icon: LifeBuoy, path: "/support", label: "Support" },
   ];
 
-  const handleInputChange = (e) => {
+  // Fetch profile data on component mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const profile = await apiService.getProfile();
+        setFormData({
+          fullName: profile.fullName || "",
+          address: profile.address || "",
+          dob: profile.dob || "",
+          country: profile.country || "",
+          email: profile.email || "",
+          phone: profile.phone || "",
+          new_first_name: profile.new_first_name || "",
+          new_last_name: profile.new_last_name || "",
+          new_phone_number: profile.new_phone_number || "",
+          password: "",
+        });
+      } catch (err) {
+        setError("Failed to fetch profile data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      // Prepare profile data for the API
+      const profileData = {
+        new_first_name: formData.new_first_name,
+        new_last_name: formData.new_last_name,
+        new_phone_number: formData.new_phone_number,
+        password: formData.password,
+      };
+
+      // Request profile change
+      await apiService.requestProfileChange(profileData);
+
+      // Verify profile change (assuming OTP is handled separately)
+      setSuccess("Profile update request sent. Check your email for OTP.");
+    } catch (err) {
+      setError("Failed to update profile. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailChange = async () => {
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      // Request email change
+      await apiService.requestEmailChange(formData.email);
+      setSuccess("Email change request sent. Check your email for OTP.");
+    } catch (err) {
+      setError("Failed to request email change. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
-      {" "}
       <DashboardNav />
       <div className="flex pt-20 min-h-screen bg-gray-50">
         {/* Sidebar */}
@@ -55,10 +142,12 @@ const ProfilePage = () => {
           <div className="p-4 border-b">
             <div className="flex items-center space-x-2">
               <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
-                JL
+                {formData.fullName.charAt(0)}
               </div>
               <div>
-                <div className="font-medium">{formData.fullName}</div>
+                <div className="font-medium">
+                  Welcome {formData.new_first_name}
+                </div>
                 <div className="text-sm text-gray-500">{formData.email}</div>
                 <div className="text-xs text-red-500 flex items-center">
                   <AlertCircle className="w-3 h-3 mr-1" />
@@ -71,12 +160,11 @@ const ProfilePage = () => {
           <nav className="p-2">
             {sidebarItems.map((item) => (
               <Link
-                //  key={item}
+                key={item.label}
                 to={item.path}
                 className="flex items-center px-6 py-3 hover:bg-gray-100 transition-colors font-semibold"
               >
                 <button
-                  key={item.label}
                   onClick={() => setActiveTab(item.label)}
                   className={`w-full flex items-center space-x-2 px-4 py-2 rounded-lg text-left ${
                     activeTab === item.label
@@ -95,13 +183,29 @@ const ProfilePage = () => {
         {/* Main Content */}
         <div className="flex-1 p-8">
           <div className="max-w-3xl mx-auto">
+            {error && (
+              <Alert className="mb-6">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            {success && (
+              <Alert className="mb-6">
+                <AlertTitle>Success</AlertTitle>
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
+
             <Alert className="mb-6">
               <AlertTitle>Complete your financial profile</AlertTitle>
               <AlertDescription>
-                This will help us ensure you're aware of the risks related to
-                online trading, and that our products are suitable for you.
+                This will help us ensure get all the available benefits and full
+                accesss and that you're aware of the risks related to online
+                trading, and that our products are suitable for you.
               </AlertDescription>
-              <Button className="mt-4">Complete Form</Button>
+              <a href="/verify">
+                <Button className="mt-4">Complete Form</Button>
+              </a>
             </Alert>
 
             <form onSubmit={handleSubmit}>
@@ -110,8 +214,9 @@ const ProfilePage = () => {
                   <h3 className="text-lg font-semibold mb-4">
                     Personal Details
                   </h3>
+
                   <div className="space-y-4">
-                    <div>
+                    {/* <div>
                       <label className="block text-sm font-medium mb-1">
                         Full Name
                       </label>
@@ -119,16 +224,41 @@ const ProfilePage = () => {
                         name="fullName"
                         value={formData.fullName}
                         onChange={handleInputChange}
+                        disabled={loading}
+                      />
+                    </div> */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        First Name
+                      </label>
+                      <Input
+                        name="new_first_name"
+                        value={formData.new_first_name}
+                        onChange={handleInputChange}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Last Name
+                      </label>
+                      <Input
+                        name="new_last_name"
+                        value={formData.new_last_name}
+                        onChange={handleInputChange}
+                        disabled={loading}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Residential Address
+                        Email
                       </label>
                       <Input
-                        name="address"
-                        value={formData.address}
-                        onChange={handleInputChange}
+                        name="email"
+                        value={formData.email}
+                        onChange={handleEmailChange}
+                        disabled={loading}
                       />
                     </div>
                     <div>
@@ -136,10 +266,11 @@ const ProfilePage = () => {
                         Date of Birth
                       </label>
                       <Input
-                        type="date"
                         name="dob"
+                        type="date"
                         value={formData.dob}
                         onChange={handleInputChange}
+                        disabled={loading}
                       />
                     </div>
                     <div>
@@ -148,40 +279,34 @@ const ProfilePage = () => {
                       </label>
                       <Input
                         name="country"
+                        type="text"
                         value={formData.country}
                         onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="text-lg font-semibold mb-4">
-                    Contact Information
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Email
-                      </label>
-                      <Input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
+                        disabled={loading}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Phone
+                        Phone Number
                       </label>
                       <Input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
+                        name="new_phone_number"
+                        type="number"
+                        value={formData.new_phone_number}
                         onChange={handleInputChange}
+                        disabled={loading}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Password
+                      </label>
+                      <Input
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        disabled={loading}
                       />
                     </div>
                   </div>
@@ -189,7 +314,13 @@ const ProfilePage = () => {
               </Card>
 
               <div className="mt-6 flex justify-end">
-                <button type="submit">Save Changes</button>type
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="Button bg-blue-500 p-2 rounded-md text-white"
+                >
+                  {loading ? "Saving..." : "Save Changes"}
+                </button>
               </div>
             </form>
           </div>

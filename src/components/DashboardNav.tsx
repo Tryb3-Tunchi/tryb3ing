@@ -78,7 +78,7 @@ const DashboardNav: React.FC = () => {
     { title: "Copy Trading", path: "/trade", icon: "copy" },
     { title: "Refer A Friend", path: "/Refer-friend", icon: "users" },
     { title: "Market Intelligence", path: "/market", icon: "chart" },
-    { title: "More", path: "", icon: "more" },
+    { title: "More", path: "/market", icon: "more" },
   ];
 
   // Display truncated wallet address
@@ -91,7 +91,7 @@ const DashboardNav: React.FC = () => {
   return (
     <div className="relative">
       {/* Main Navbar */}
-      <nav className="bg-white shadow-md px-6 h-20 flex items-center justify-between fixed top-0 w-full z-50">
+      <nav className="bg-white shadow-md py-6 px-6 h-22 flex items-center justify-between fixed top-0 w-full z-50">
         {/* Left Section */}
         <div className="flex items-center justify-center space-x-2">
           <button

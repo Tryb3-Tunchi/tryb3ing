@@ -134,7 +134,12 @@ export const BalanceProvider = ({ children }: BalanceProviderProps) => {
 
     try {
       // Create the deposit
-      const depositResponse = await apiService.createDeposit(amount);
+      const depositResponse = await apiService.createDeposit({
+        amount,
+        method,
+        cryptoType,
+        status: "processing"
+      });
 
       // Generate a unique ID for this deposit
       const depositId = Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -154,7 +159,7 @@ export const BalanceProvider = ({ children }: BalanceProviderProps) => {
       setTransactions(prevTransactions => [...prevTransactions, newTransaction]);
 
       // Refresh balances to get the updated balance
-      await refreshBalances();
+      // await refreshBalances();
 
       // Return both the API response and the new transaction
       return { depositResponse, transaction: newTransaction };
@@ -188,7 +193,18 @@ export const BalanceProvider = ({ children }: BalanceProviderProps) => {
 
   // Fetch balances on initial load
   useEffect(() => {
+    // Initial refresh
     refreshBalances();
+    
+    // Set a timeout to allow the next refresh after 12 hours
+    const timeoutId = setTimeout(() => {
+      // Code to run after 12 hours
+      console.log("12 hours have passed, ready for next refresh");
+      // You could set a flag here to allow the next refresh
+    }, 12 * 60 * 60 * 1000); // 12 hours in milliseconds
+    
+    // Cleanup function to clear the timeout if component unmounts
+    return () => clearTimeout(timeoutId);
   }, []);
 
   // Value to be provided by the context

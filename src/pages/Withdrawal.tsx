@@ -55,7 +55,7 @@ const WithdrawalPage: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string>("");
 
   // Get balance from context
-  const { balances, refreshBalances } = useContext(BalanceContext);
+  const { balances } = useContext(BalanceContext);
 
   // Get primary balance
   const getPrimaryBalance = () => {
@@ -234,7 +234,7 @@ const WithdrawalPage: React.FC = () => {
       setShowWithdrawalForm(false);
 
       // Refresh balance to show pending changes
-      await refreshBalances();
+      // await refreshBalances();
     } catch (err) {
       console.error("Withdrawal request failed:", err);
       setError("Failed to process your withdrawal request. Please try again later.");
@@ -251,7 +251,7 @@ const WithdrawalPage: React.FC = () => {
   return (
     <>
       <DashboardNav />
-      <div className="w-full max-w-6xl mt-20 mx-auto p-4 space-y-6">
+      <div className="w-full max-w-6xl mt-24 mx-auto p-4 space-y-6">
         {/* Account Balance Section */}
         <Card className="bg-white rounded-xl shadow-sm">
           <CardHeader>

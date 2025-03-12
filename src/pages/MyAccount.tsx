@@ -47,17 +47,22 @@ const MyAccount: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [depositActivities, setDepositActivities] = useState<Activity[]>([]);
-  const [withdrawalActivities, setWithdrawalActivities] = useState<Activity[]>([]);
+  const [withdrawalActivities, setWithdrawalActivities] = useState<Activity[]>(
+    []
+  );
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   // Use context for global balance state
-  const { balances, refreshBalances, isLoading: balanceLoading } =
-    useContext(BalanceContext);
+  const {
+    balances,
+    // refreshBalances,
+    isLoading: balanceLoading,
+  } = useContext(BalanceContext);
 
   // Helper function to format time relative to now
   const formatRelativeTime = (timestamp: string): string => {
     if (!timestamp) return "Unknown time";
-    
+
     try {
       const date = new Date(timestamp);
       const now = new Date();
@@ -84,7 +89,7 @@ const MyAccount: React.FC = () => {
       const withdrawals: Withdrawal[] = await apiService.getWithdrawals();
 
       // Process deposits with error handling
-      const depositItems: Activity[] = Array.isArray(deposits) 
+      const depositItems: Activity[] = Array.isArray(deposits)
         ? deposits.map((deposit) => ({
             id: deposit.id || Math.random(),
             type: "Deposit",
@@ -109,17 +114,23 @@ const MyAccount: React.FC = () => {
 
       // Sort by most recent first and store separately
       setDepositActivities(
-        depositItems.sort(
-          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        ).slice(0, 5) // Take only the 5 most recent
+        depositItems
+          .sort(
+            (a, b) =>
+              new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          )
+          .slice(0, 5) // Take only the 5 most recent
       );
-      
+
       setWithdrawalActivities(
-        withdrawalItems.sort(
-          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        ).slice(0, 5) // Take only the 5 most recent
+        withdrawalItems
+          .sort(
+            (a, b) =>
+              new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          )
+          .slice(0, 5) // Take only the 5 most recent
       );
-      
+
       setLastUpdated(new Date());
     } catch (err) {
       console.error("Activity fetch error:", err);
@@ -134,7 +145,7 @@ const MyAccount: React.FC = () => {
   const refreshData = async () => {
     setError(null);
     try {
-      await refreshBalances(); // Fetch balances
+      // await refreshBalances(); // Fetch balances
       await fetchRecentActivity(); // Fetch recent activity
       setIsLoading(false);
     } catch (err) {
@@ -178,19 +189,24 @@ const MyAccount: React.FC = () => {
 
     return {
       balance: balanceAmount,
-      equity: balance.equity ? parseFloat(balance.equity) : balanceAmount * 1.25,
-      margin: balance.margin ? parseFloat(balance.margin) : balanceAmount * 0.25,
+      equity: balance.equity
+        ? parseFloat(balance.equity)
+        : balanceAmount * 1.25,
+      margin: balance.margin
+        ? parseFloat(balance.margin)
+        : balanceAmount * 0.25,
       freeMargin: balance.free_margin
         ? parseFloat(balance.free_margin)
         : balanceAmount * 0.8,
-      marginLevel: balance.margin_level ? parseFloat(balance.margin_level) : 450.5,
+      marginLevel: balance.margin_level
+        ? parseFloat(balance.margin_level)
+        : 450.5,
       openPositions: 3, // This might need to come from another API endpoint
-      profitLoss:
-        balance.profit_loss
-          ? parseFloat(balance.profit_loss)
-          : balance.equity
-          ? parseFloat(balance.equity) - balanceAmount
-          : balanceAmount * 0.25,
+      profitLoss: balance.profit_loss
+        ? parseFloat(balance.profit_loss)
+        : balance.equity
+        ? parseFloat(balance.equity) - balanceAmount
+        : balanceAmount * 0.25,
     };
   };
 
@@ -383,7 +399,10 @@ const MyAccount: React.FC = () => {
 
       {/* Display separate cards for deposits and withdrawals */}
       <ActivityList activities={depositActivities} title="Recent Deposits" />
-      <ActivityList activities={withdrawalActivities} title="Recent Withdrawals" />
+      <ActivityList
+        activities={withdrawalActivities}
+        title="Recent Withdrawals"
+      />
     </div>
   );
 
@@ -395,12 +414,15 @@ const MyAccount: React.FC = () => {
           onClick={() => setShowTrading(false)}
           className="text-gray-600 hover:text-gray-800 flex items-center space-x-2"
         >
-          <ArrowDownRight className="w-4 h-4" />
-          <span>Back to Account Overview</span>
+          <a href="/myaccount">
+            <span>Back to Account Overview</span>
+          </a>
         </button>
         <div className="flex items-center space-x-4">
           <Clock className="w-4 h-4 text-gray-600" />
-          <span className="text-sm text-gray-600">Last updated: {lastUpdated.toLocaleTimeString()}</span>
+          <span className="text-sm text-gray-600">
+            Last updated: {lastUpdated.toLocaleTimeString()}
+          </span>
         </div>
       </div>
 

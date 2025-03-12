@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 import { ChevronDown, X, Globe, Menu } from "lucide-react";
 // import { Link } from "react-router-dom";
 import LoginModal from "./login/AuthLogin";
@@ -28,12 +28,16 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 w-full bg-white shadow-md z-50">
+    <nav className="fixed top-0 w-full py-3 bg-white shadow-md z-50">
       {/* Main Navbar Content */}
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex-shrink-0 font-bold text-xl">LOGO</div>
+          {/* XEX Platform */}
+          <div className="flex-shrink-0 mt-4 -ml-8 font-bold text-3xl">
+            <a href="/">
+              <img src="./LOGO1.png" alt="" width={150} height={50} />
+            </a>{" "}
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
@@ -137,7 +141,11 @@ const Navbar = () => {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="md:hidden p-2 rounded-lg hover:bg-gray-100"
           >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {isMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
           </button>
         </div>
       </div>
@@ -169,7 +177,9 @@ const Navbar = () => {
             {isTradingOpen && (
               <div className="mt-2 ml-4 space-y-4">
                 <div>
-                  <h3 className="font-bold text-gray-800 px-4 py-2">ACCOUNTS</h3>
+                  <h3 className="font-bold text-gray-800 px-4 py-2">
+                    ACCOUNTS
+                  </h3>
                   <div className="space-y-1">
                     {tradingSubmenu.ACCOUNTS.map((item) => (
                       <a

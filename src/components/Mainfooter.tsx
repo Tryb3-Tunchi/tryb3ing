@@ -12,7 +12,7 @@ import {
 const MainFooter = () => {
   return (
     <footer className="bg-gray-900 text-gray-300 pt-12 pb-6">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="w-full mx-auto px-4">
         {/* Quick Links */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pb-8 border-b border-gray-700">
           <div>

@@ -1,10 +1,11 @@
-import  { useState } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "../components/Card";
 import { Button } from "../components/Card";
-import {  Wallet, History, Gift,  } from "lucide-react";
+import { Wallet, History, Gift } from "lucide-react";
 import { Link } from "react-router-dom";
 // import Footer from "../components/Footer";
 import MainFooter from "../components/Mainfooter";
+import DashboardNav from "../components/DashboardNav";
 
 const ReferFriendPage = () => {
   const [selectedYear, setSelectedYear] = useState("2024");
@@ -15,26 +16,27 @@ const ReferFriendPage = () => {
   const monthlyData = [
     {
       month: "January",
-      earned: "$250",
-      successful: 5,
+      earned: "$100.00",
+      successful: 1,
       pending: 2,
-      expired: 1,
+      expired: 0,
       ineligible: 0,
     },
     {
       month: "February",
-      earned: "$180",
-      successful: 3,
-      pending: 1,
+      earned: "$0.00",
+      successful: 0,
+      pending: 0,
       expired: 0,
-      ineligible: 1,
+      ineligible: 0,
     },
     // Add more months as needed
   ];
 
   return (
     <>
-      <div className="max-w-6xl mx-auto p-4">
+      <DashboardNav />
+      <div className="max-w-6xl mt-20 mx-auto p-4">
         {/* Navigation */}
         <div className="flex items-center space-x-2 mb-6">
           <Link to="/home">
@@ -76,14 +78,14 @@ const ReferFriendPage = () => {
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold mb-4">History</h2>
                   {/* Year Selector */}
-                  <div className="flex flex-wrap gap-2 mb-6">
+                  <div className="flex flex-wrap p-1 gap-2 mb-6">
                     {years.map((year) => (
                       <button
                         key={year}
                         className={`${
                           selectedYear === year
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            ? "bg-blue-200 text-black p-1 rounded-md"
+                            : "bg-gray-100 text-gray-700 p-1 rounded-md hover:bg-gray-200"
                         }`}
                         onClick={() => setSelectedYear(year)}
                       >
@@ -93,11 +95,11 @@ const ReferFriendPage = () => {
                   </div>
 
                   {/* Status Filters */}
-                  <div className="flex flex-wrap gap-2 mb-6">
+                  <div className="flex flex-wrap gap-2 text-black mb-6">
                     {["Successful", "Pending", "Ineligible"].map((status) => (
                       <Button
                         key={status}
-                        className="bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        className="bg-gray-100 text-black  hover:bg-black hover:text-white"
                       >
                         {status}
                       </Button>

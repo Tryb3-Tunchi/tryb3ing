@@ -9,7 +9,7 @@ const Cards = () => {
       title: "Forex Trading",
       description:
         "Trade the world's largest financial market with competitive spreads and no commissions",
-      image: "/forex.png",
+      image: "/img1.png",
       gradient: "from-blue-500 to-purple-600",
       icon: "📈",
     },
@@ -17,7 +17,7 @@ const Cards = () => {
       title: "Stocks & ETFs",
       description:
         "Access thousands of stocks and ETFs from the world's leading exchanges",
-      image: "/stocks.png",
+      image: "/img2.svg",
       gradient: "from-purple-500 to-pink-600",
       icon: "📊",
     },
@@ -25,7 +25,7 @@ const Cards = () => {
       title: "Commodities",
       description:
         "Trade gold, silver, oil and other popular commodities with tight spreads",
-      image: "/commodities.png",
+      image: "/img3.png",
       gradient: "from-orange-500 to-red-600",
       icon: "🏆",
     },
@@ -33,7 +33,7 @@ const Cards = () => {
       title: "Crypto Trading",
       description:
         "Trade major cryptocurrencies with leverage and 24/7 support",
-      image: "/crypto.png",
+      image: "/img4.png",
       gradient: "from-green-500 to-teal-600",
       icon: "💎",
     },
@@ -48,10 +48,18 @@ const Cards = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-3xl md:text-4xl font-bold text-gray-900 mb-4"
+            className="text-2xl md:text-4xl font-bold text-gray-900 mb-6"
           >
-            Discover Our Traders' Favourites
+            Discover The Best Trading Experience at XEX
           </motion.h2>
+          <motion.h3
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-xl md:text-3xl font-semibold text-gray-700"
+          >
+            "Your Gateway to Global Markets"
+          </motion.h3>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -113,7 +121,7 @@ const Cards = () => {
           ))}
         </div>
 
-        {/* XM App Card */}
+        {/* XEX  App Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -122,10 +130,10 @@ const Cards = () => {
         >
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="mb-8 md:mb-0">
-              <h3 className="text-3xl font-bold mb-4">XM App</h3>
+              <h3 className="text-3xl font-bold mb-4">XEX App</h3>
               <p className="text-xl text-gray-300 max-w-xl">
-                Get full access to XM services with the top-rated, award-winning
-                XM App.
+                Get full access to XEX services with the top-rated,
+                award-winning XEX App (Coming Soon!!!).
               </p>
               <div className="flex space-x-4 mt-6">
                 <button className="flex items-center space-x-2 bg-white text-gray-900 px-6 py-3 rounded-full font-semibold hover:bg-opacity-90 transition-all duration-300">
@@ -152,8 +160,8 @@ const Cards = () => {
             </div>
             <div className="relative w-64 h-64">
               <img
-                src="/app-preview.png"
-                alt="XM App Preview"
+                src="/img5.png"
+                alt="XEX  App Preview"
                 className="w-full h-full object-contain"
               />
             </div>

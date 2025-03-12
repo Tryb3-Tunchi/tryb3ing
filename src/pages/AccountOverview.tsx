@@ -1,4 +1,4 @@
-import  { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { MoreVertical, Download, Upload, Plus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { BalanceContext } from "../components/balance/BalanceContext"; // Import the BalanceContext
@@ -39,8 +39,11 @@ const AccountOverview = () => {
   const navigate = useNavigate();
 
   // Use BalanceContext to access balances and refresh function
-  const { balances, refreshBalances, isLoading: balanceLoading } =
-    useContext(BalanceContext);
+  const {
+    balances,
+    refreshBalances,
+    isLoading: balanceLoading,
+  } = useContext(BalanceContext);
 
   // Fetch account data and update balances
   useEffect(() => {
@@ -240,10 +243,13 @@ const AccountOverview = () => {
               <h3 className="text-3xl font-bold text-green-500">
                 {balanceLoading || isLoading
                   ? "Loading..."
-                  : `$${accounts[accountType]?.profit.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}`}
+                  : `$${accounts[accountType]?.profit.toLocaleString(
+                      undefined,
+                      {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }
+                    )}`}
               </h3>
             </div>
           </div>

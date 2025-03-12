@@ -402,12 +402,19 @@ class ApiService {
     return this.fetch<Deposit>(`/api/deposits/${id}/`);
   }
 
-  public async createDeposit(amount: number): Promise<Deposit> {
-    return this.fetch<Deposit>("/api/deposits/", {
-      method: "POST",
-      body: JSON.stringify({ amount: amount.toString() }),
-    });
-  }
+  
+public async createDeposit(depositData: { amount: number; method: string; cryptoType?: string; status: string }): Promise<Deposit> {
+
+  return this.fetch<Deposit>("/api/deposits/", {
+
+    method: "POST",
+
+    body: JSON.stringify(depositData),
+
+  });
+
+}
+
 
   public async updateDeposit(
     id: number,
@@ -477,7 +484,53 @@ class ApiService {
       method: "DELETE",
     });
   }
+
+  // Add these methods to the ApiService class
+
+// Profile Methods
+public async getProfile(): Promise<any> {
+  return this.fetch<any>("/auth/profile/", {
+    method: "GET",
+  });
 }
+
+public async requestEmailChange(email: string): Promise<any> {
+  return this.fetch<any>("/auth/profile/request-email-change/", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+public async requestProfileChange(profileData: any): Promise<any> {
+  return this.fetch<any>("/auth/profile/request-profile-change/", {
+    method: "POST",
+    body: JSON.stringify(profileData),
+  });
+}
+
+public async resendEmailChangeOtp(email: string): Promise<any> {
+  return this.fetch<any>("/auth/profile/resend-email-change-otp/", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+public async verifyEmailChange(email: string, otp: string): Promise<any> {
+  return this.fetch<any>("/auth/profile/verify-email-change/", {
+    method: "POST",
+    body: JSON.stringify({ email, otp }),
+  });
+}
+
+public async verifyProfileChange(profileData: any, otp: string): Promise<any> {
+  return this.fetch<any>("/auth/profile/verify-profile-change/", {
+    method: "POST",
+    body: JSON.stringify({ ...profileData, otp }),
+  });
+}
+}
+
+
 
 // Create a singleton instance
 const apiService = new ApiService();

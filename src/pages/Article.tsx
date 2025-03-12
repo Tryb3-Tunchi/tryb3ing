@@ -22,6 +22,10 @@ const ResultsSection = () => {
     {
       title: "Instant Withdrawals",
       description: "Get your funds easily and pay no fees."
+    },
+    {
+      title: "Easy Copy Trading",
+      description: "copy professional traders easily and get your funds up without a sweat and no fees."
     }
   ];
 
@@ -46,9 +50,9 @@ const ResultsSection = () => {
               className="bg-white/10 rounded-lg p-6"
             >
               <div className="text-5xl font-bold mb-2">
-                0123456789.0123456789
+                29
               </div>
-              <p>Billion trades have been executed on XM Platforms</p>
+              <p>Billion trades have been executed on XEX  Platforms</p>
             </motion.div>
 
             <motion.div 
@@ -66,9 +70,20 @@ const ResultsSection = () => {
               className="bg-white/10 rounded-lg p-6"
             >
               <div className="text-5xl font-bold mb-2">
-                01234567890123456789.0123456789%
+                99%
               </div>
               <p>of our withdrawals are automatically approved</p>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="bg-white/10 rounded-lg p-6"
+            >
+              <div className="text-5xl font-bold mb-2">
+                ALL
+              </div>
+              <p>trades are profitedable and secured</p>
             </motion.div>
           </div>
 
