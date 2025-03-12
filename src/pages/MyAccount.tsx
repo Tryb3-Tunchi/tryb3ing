@@ -414,9 +414,8 @@ const MyAccount: React.FC = () => {
           onClick={() => setShowTrading(false)}
           className="text-gray-600 hover:text-gray-800 flex items-center space-x-2"
         >
-          <a href="/myaccount">
-            <span>Back to Account Overview</span>
-          </a>
+          <span><a href="/myaccount"><ArrowDownRight className="w-4 h-4" />
+          Back to Account Overview</a></span>
         </button>
         <div className="flex items-center space-x-4">
           <Clock className="w-4 h-4 text-gray-600" />
