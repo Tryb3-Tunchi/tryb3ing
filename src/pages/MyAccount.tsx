@@ -414,8 +414,12 @@ const MyAccount: React.FC = () => {
           onClick={() => setShowTrading(false)}
           className="text-gray-600 hover:text-gray-800 flex items-center space-x-2"
         >
-          <span><a href="/myaccount"><ArrowDownRight className="w-4 h-4" />
-          Back to Account Overview</a></span>
+          <span>
+            <a className="flex" href="/myaccount">
+              <ArrowDownRight className="w-4 h-4 mt-1 mr-2" />
+              Back to Account Overview
+            </a>
+          </span>
         </button>
         <div className="flex items-center space-x-4">
           <Clock className="w-4 h-4 text-gray-600" />

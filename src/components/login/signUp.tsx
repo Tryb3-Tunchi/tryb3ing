@@ -154,7 +154,7 @@ const SignUpPage = () => {
     signupData.agreedToTerms;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 px-4 py-12">
+    <div className="min-h-screen flex items-center mt-20 justify-center bg-gradient-to-br from-blue-50 to-indigo-50 px-4 py-12">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -left-64 top-0">
           <img

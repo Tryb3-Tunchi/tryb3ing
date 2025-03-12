@@ -61,18 +61,18 @@ const SignInPage = () => {
           setError("Authentication error: missing refresh token");
           return;
         }
-        
+
         // Double-check that tokens are in localStorage
         const storedToken = localStorage.getItem("token");
         const storedRefreshToken = localStorage.getItem("refreshToken");
-        
+
         if (!storedToken || !storedRefreshToken) {
           console.error("Tokens not properly stored in localStorage");
           // Manually store them again to be safe
           localStorage.setItem("token", response.access_token);
           localStorage.setItem("refreshToken", response.refresh_token);
         }
-        
+
         setVerificationModalOpen(true);
         if (rememberMe) {
           localStorage.setItem("rememberedEmail", loginData.email);
@@ -93,13 +93,13 @@ const SignInPage = () => {
         // Ensure we have valid tokens after OTP verification
         const storedToken = localStorage.getItem("token");
         const storedRefreshToken = localStorage.getItem("refreshToken");
-        
+
         if (!storedToken || !storedRefreshToken) {
           console.error("Tokens missing after OTP verification");
           setError("Authentication error after verification");
           return;
         }
-        
+
         navigate("/home");
       } else {
         alert("OTP verification failed.");

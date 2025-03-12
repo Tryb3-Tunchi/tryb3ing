@@ -110,7 +110,7 @@ const ResultsSection = () => {
             whileTap={{ scale: 0.95 }}
             className="mt-12 px-8 py-4 bg-white text-blue-900 rounded-full font-bold text-lg hover:bg-gray-100 transition-colors"
           >
-            Start Trading Today
+            <a href="/signup">Start Trading Today</a>
           </motion.button>
         </div>
       </div>

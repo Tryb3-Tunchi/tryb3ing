@@ -98,8 +98,9 @@ const Cards = () => {
                   <button className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-full font-semibold backdrop-blur-sm transition-all duration-300">
                     Learn More
                   </button>
+
                   <button className="bg-white text-gray-900 px-6 py-3 rounded-full font-semibold hover:bg-opacity-90 transition-all duration-300">
-                    Start Trading
+                    <a href="/signup">Start Trading</a>
                   </button>
                 </div>
               </div>
