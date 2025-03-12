@@ -55,7 +55,7 @@ const MyAccount: React.FC = () => {
   // Use context for global balance state
   const {
     balances,
-    // refreshBalances,
+    refreshBalances,
     isLoading: balanceLoading,
   } = useContext(BalanceContext);
 
@@ -145,7 +145,7 @@ const MyAccount: React.FC = () => {
   const refreshData = async () => {
     setError(null);
     try {
-      // await refreshBalances(); // Fetch balances
+      await refreshBalances(); // Fetch balances
       await fetchRecentActivity(); // Fetch recent activity
       setIsLoading(false);
     } catch (err) {

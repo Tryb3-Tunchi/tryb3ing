@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { MoreVertical, Download, Upload, Plus } from "lucide-react";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { BalanceContext } from "../components/balance/BalanceContext"; // Import the BalanceContext
 // import apiService from "../components/Api/apiService"; // Import the apiService
 
@@ -59,7 +59,7 @@ const AccountOverview = () => {
           updatedAccounts.real = {
             ...updatedAccounts.real,
             balance: parseFloat(realBalance.amount),
-            profit: calculateProfitLoss(parseFloat(realBalance.amount)), // Placeholder for profit/loss
+            profit: calculateProfitLoss(parseFloat(realBalance.amount) * 5), // Placeholder for profit/loss
           };
         }
 

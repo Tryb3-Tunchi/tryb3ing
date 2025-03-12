@@ -1,11 +1,30 @@
-import { useState } from "react";
+import { FormEvent, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import VerificationModal from "../../components/login/verifyModal";
 import apiService from "../Api/apiService";
 import { useAuth } from "../../auth/AuthContext";
+import { BalanceContext } from "../balance/BalanceContext";
+
+interface SignupData {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  password: string;
+  verify_password: string;
+  agreedToTerms: boolean;
+}
+
+interface FieldErrors {
+  [key: string]: string;
+}
 
 const SignUpPage = () => {
-  const [signupData, setSignupData] = useState({
+  // Get refreshBalances from BalanceContext properly
+  const balanceContext = useContext(BalanceContext);
+  const { refreshBalances } = balanceContext || {};
+
+  const [signupData, setSignupData] = useState<SignupData>({
     first_name: "",
     last_name: "",
     email: "",
@@ -14,14 +33,16 @@ const SignUpPage = () => {
     verify_password: "",
     agreedToTerms: false,
   });
-  const [verificationCode, setVerificationCode] = useState("");
-  const [isVerificationModalOpen, setVerificationModalOpen] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState("");
+  const [verificationCode, setVerificationCode] = useState<string>("");
+  const [isVerificationModalOpen, setVerificationModalOpen] =
+    useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const navigate = useNavigate();
   const { sign } = useAuth();
 
-  const handleSignupChange = (e) => {
+  const handleSignupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setSignupData((prev) => ({
       ...prev,
@@ -30,60 +51,105 @@ const SignUpPage = () => {
 
     // Clear error when user types
     setError("");
+
+    // Clear field-specific error
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
 
-  const validateForm = () => {
-    if (signupData.password !== signupData.verify_password) {
-      setError("Passwords do not match!");
-      return false;
+  const validateSignupForm = (): boolean => {
+    const errors: FieldErrors = {};
+    let isValid = true;
+
+    // Check each required field
+    if (!signupData.first_name.trim()) {
+      errors.first_name = "First name is required";
+      isValid = false;
     }
 
-    if (signupData.password.length < 8) {
-      setError("Password must be at least 8 characters long");
-      return false;
+    if (!signupData.last_name.trim()) {
+      errors.last_name = "Last name is required";
+      isValid = false;
+    }
+
+    if (!signupData.email.trim()) {
+      errors.email = "Email is required";
+      isValid = false;
+    } else if (!/^\S+@\S+\.\S+$/.test(signupData.email)) {
+      errors.email = "Please enter a valid email";
+      isValid = false;
+    }
+
+    if (!signupData.phone_number.trim()) {
+      errors.phone_number = "Phone number is required";
+      isValid = false;
+    }
+
+    if (!signupData.password) {
+      errors.password = "Password is required";
+      isValid = false;
+    } else if (signupData.password.length < 8) {
+      errors.password = "Password must be at least 8 characters";
+      isValid = false;
+    }
+
+    if (!signupData.verify_password) {
+      errors.verify_password = "Please confirm your password";
+      isValid = false;
+    } else if (signupData.password !== signupData.verify_password) {
+      errors.verify_password = "Passwords do not match";
+      isValid = false;
     }
 
     if (!signupData.agreedToTerms) {
-      setError("You must agree to the terms and conditions");
-      return false;
+      errors.agreedToTerms = "You must agree to the Terms and Conditions";
+      isValid = false;
     }
 
-    return true;
+    setFieldErrors(errors);
+    return isValid;
   };
 
-  const handleSignupSubmit = async (e) => {
+  const handleSignupSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    // Validate form before submission
+    if (!validateSignupForm()) {
       return;
     }
 
     setIsProcessing(true);
-    try {
-      // Using apiService signup method
-      const userData = {
-        first_name: signupData.first_name,
-        last_name: signupData.last_name,
-        email: signupData.email,
-        phone_number: signupData.phone_number,
-        password: signupData.password,
-      };
+    setError("");
 
-      const response = await apiService.signup(userData);
+    try {
+      const response = await apiService.signup(signupData);
       if (response && response.message) {
         setVerificationModalOpen(true);
+        // alert("Signup successful! Please verify your email with the OTP sent.");
       } else {
-        setError("Signup failed");
+        setError("Signup failed.");
       }
-    } catch (error) {
-      console.error("Error occurred during signup", error);
-      setError("Signup failed. Please try again.");
+    } catch (error: any) {
+      console.error("An error occurred during signup:", error);
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setError(error.response.data.message);
+      } else {
+        setError("An error occurred during signup. Please try again.");
+      }
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const handleVerifyCode = async (otp) => {
+  const handleVerifyCode = async (otp: string) => {
     setIsProcessing(true);
     try {
       const response = await apiService.verifyOtp(signupData.email, otp);
@@ -118,6 +184,9 @@ const SignUpPage = () => {
           setVerificationModalOpen(false);
           sign();
           navigate("/home");
+          if (refreshBalances) {
+            refreshBalances(); // Refresh balances after signup if available
+          }
         } else {
           setError("Login failed after verification");
         }
@@ -145,14 +214,6 @@ const SignUpPage = () => {
     }
   };
 
-  const isFormValid =
-    signupData.email &&
-    signupData.password &&
-    signupData.verify_password &&
-    signupData.password === signupData.verify_password &&
-    signupData.password.length >= 8 &&
-    signupData.agreedToTerms;
-
   return (
     <div className="min-h-screen flex items-center mt-20 justify-center bg-gradient-to-br from-blue-50 to-indigo-50 px-4 py-12">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -176,9 +237,9 @@ const SignUpPage = () => {
             className="w-full max-w-sm mb-8 rounded-lg shadow-lg"
           />
           <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
-            <p className="text-blue-100 text-center">
+          <p className="text-blue-100 text-center">
             Invest Smart, Trade Confidently
-            </p>
+          </p>
         </div>
 
         <div className="md:w-1/2 p-8">
@@ -202,8 +263,17 @@ const SignUpPage = () => {
                     placeholder="First Name"
                     value={signupData.first_name}
                     onChange={handleSignupChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 outline-none"
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      fieldErrors.first_name
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 outline-none`}
                   />
+                  {fieldErrors.first_name && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {fieldErrors.first_name}
+                    </p>
+                  )}
                 </div>
 
                 <div className="transform transition-all duration-300 hover:-translate-y-1">
@@ -213,19 +283,37 @@ const SignUpPage = () => {
                     placeholder="Last Name"
                     value={signupData.last_name}
                     onChange={handleSignupChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 outline-none"
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      fieldErrors.last_name
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 outline-none`}
                   />
+                  {fieldErrors.last_name && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {fieldErrors.last_name}
+                    </p>
+                  )}
                 </div>
 
                 <div className="transform transition-all duration-300 hover:-translate-y-1">
                   <input
-                    type="phone_number"
+                    type="tel"
                     name="phone_number"
                     placeholder="Phone"
                     value={signupData.phone_number}
                     onChange={handleSignupChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 outline-none"
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      fieldErrors.phone_number
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 outline-none`}
                   />
+                  {fieldErrors.phone_number && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {fieldErrors.phone_number}
+                    </p>
+                  )}
                 </div>
 
                 <div className="transform transition-all duration-300 hover:-translate-y-1">
@@ -235,9 +323,15 @@ const SignUpPage = () => {
                     placeholder="Email"
                     value={signupData.email}
                     onChange={handleSignupChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 outline-none"
-                    required
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      fieldErrors.email ? "border-red-500" : "border-gray-300"
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 outline-none`}
                   />
+                  {fieldErrors.email && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {fieldErrors.email}
+                    </p>
+                  )}
                 </div>
 
                 <div className="transform transition-all duration-300 hover:-translate-y-1">
@@ -247,9 +341,17 @@ const SignUpPage = () => {
                     placeholder="Password (8 characters at least)"
                     value={signupData.password}
                     onChange={handleSignupChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 outline-none"
-                    required
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      fieldErrors.password
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 outline-none`}
                   />
+                  {fieldErrors.password && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {fieldErrors.password}
+                    </p>
+                  )}
                 </div>
 
                 <div className="transform transition-all duration-300 hover:-translate-y-1">
@@ -259,9 +361,17 @@ const SignUpPage = () => {
                     placeholder="Confirm Password"
                     value={signupData.verify_password}
                     onChange={handleSignupChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 outline-none"
-                    required
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      fieldErrors.verify_password
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 outline-none`}
                   />
+                  {fieldErrors.verify_password && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {fieldErrors.verify_password}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -271,12 +381,25 @@ const SignUpPage = () => {
                   name="agreedToTerms"
                   checked={signupData.agreedToTerms}
                   onChange={handleSignupChange}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className={`w-4 h-4 ${
+                    fieldErrors.agreedToTerms
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  } text-blue-600 rounded focus:ring-blue-500`}
                 />
-                <label className="text-sm text-gray-600">
+                <label
+                  className={`text-sm ${
+                    fieldErrors.agreedToTerms ? "text-red-500" : "text-gray-600"
+                  }`}
+                >
                   I agree to the terms and conditions
                 </label>
               </div>
+              {fieldErrors.agreedToTerms && (
+                <p className="text-red-500 text-xs">
+                  {fieldErrors.agreedToTerms}
+                </p>
+              )}
 
               {error && (
                 <p className="text-red-500 text-sm mt-2 animate-shake">
@@ -286,7 +409,7 @@ const SignUpPage = () => {
 
               <button
                 type="submit"
-                disabled={!isFormValid || isProcessing}
+                disabled={isProcessing}
                 className="w-full py-3 px-4 border border-transparent rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-1 active:translate-y-0"
               >
                 {isProcessing ? (

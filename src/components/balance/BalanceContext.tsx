@@ -29,6 +29,7 @@ interface BalanceContextType {
   updateBalances: (newBalances: Balance[]) => void;
   refreshBalances: () => Promise<void>;
   createDeposit: (amount: number, method: string, cryptoType?: string) => Promise<any>;
+  verifyDeposit: (id: number) => Promise<void>; // Add verifyDeposit method
   getRecentTransactions: () => Transaction[];
   isLoading: boolean;
   error: string | null;
@@ -42,6 +43,7 @@ export const BalanceContext = createContext<BalanceContextType>({
   updateBalances: () => {},
   refreshBalances: async () => {},
   createDeposit: async () => {},
+  verifyDeposit: async () => {}, // Add verifyDeposit to default context
   getRecentTransactions: () => [],
   isLoading: false,
   error: null,
@@ -69,7 +71,7 @@ export const BalanceProvider = ({ children }: BalanceProviderProps) => {
         // Convert string timestamps back to Date objects
         const formattedTransactions = parsedTransactions.map((tx: any) => ({
           ...tx,
-          timestamp: new Date(tx.timestamp)
+          timestamp: new Date(tx.timestamp),
         }));
         setTransactions(formattedTransactions);
       } catch (err) {
@@ -138,7 +140,7 @@ export const BalanceProvider = ({ children }: BalanceProviderProps) => {
         amount,
         method,
         cryptoType,
-        status: "processing"
+        status: "processing",
       });
 
       // Generate a unique ID for this deposit
@@ -152,14 +154,14 @@ export const BalanceProvider = ({ children }: BalanceProviderProps) => {
         method: method,
         cryptoType: cryptoType,
         status: "processing",
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       // Add to transactions list
-      setTransactions(prevTransactions => [...prevTransactions, newTransaction]);
+      setTransactions((prevTransactions) => [...prevTransactions, newTransaction]);
 
       // Refresh balances to get the updated balance
-      // await refreshBalances();
+      await refreshBalances();
 
       // Return both the API response and the new transaction
       return { depositResponse, transaction: newTransaction };
@@ -176,33 +178,57 @@ export const BalanceProvider = ({ children }: BalanceProviderProps) => {
     }
   };
 
+  // Function to verify a deposit and update balances
+  const verifyDeposit = async (id: number) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Verify the deposit
+      const verifiedDeposit = await apiService.verifyDeposit(id);
+
+      if (verifiedDeposit.is_verified) {
+        // Refresh balances to reflect the updated balance
+        await refreshBalances();
+      }
+    } catch (err) {
+      console.error("Failed to verify deposit:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Could not verify deposit. Please try again later."
+      );
+      throw err; // Re-throw the error for handling in the component
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Function to get recent transactions
   const getRecentTransactions = () => {
     // Filter out expired transactions (older than 6 hours)
-    const validTransactions = transactions.filter(transaction => {
+    const validTransactions = transactions.filter((transaction) => {
       const transactionTime = transaction.timestamp.getTime();
       const currentTime = new Date().getTime();
       return currentTime - transactionTime < 6 * 60 * 60 * 1000; // 6 hours
     });
 
     // Return sorted by timestamp (newest first)
-    return validTransactions.sort((a, b) => 
-      b.timestamp.getTime() - a.timestamp.getTime()
-    );
+    return validTransactions.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   };
 
   // Fetch balances on initial load
   useEffect(() => {
     // Initial refresh
     refreshBalances();
-    
+
     // Set a timeout to allow the next refresh after 12 hours
     const timeoutId = setTimeout(() => {
       // Code to run after 12 hours
       console.log("12 hours have passed, ready for next refresh");
       // You could set a flag here to allow the next refresh
     }, 12 * 60 * 60 * 1000); // 12 hours in milliseconds
-    
+
     // Cleanup function to clear the timeout if component unmounts
     return () => clearTimeout(timeoutId);
   }, []);
@@ -215,14 +241,13 @@ export const BalanceProvider = ({ children }: BalanceProviderProps) => {
     updateBalances,
     refreshBalances,
     createDeposit,
+    verifyDeposit, // Add verifyDeposit to context value
     getRecentTransactions,
     isLoading,
     error,
   };
 
-  return (
-    <BalanceContext.Provider value={value}>{children}</BalanceContext.Provider>
-  );
+  return <BalanceContext.Provider value={value}>{children}</BalanceContext.Provider>;
 };
 
 export default BalanceProvider;

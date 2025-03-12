@@ -1,15 +1,10 @@
 import React, { useState, useContext, useEffect } from "react";
-import {
-  Wallet,
-  AlertCircle,
-  Clock,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import { Wallet, AlertCircle, Clock, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/Card";
 import DashboardNav from "../components/DashboardNav";
 import { BalanceContext } from "../components/balance/BalanceContext";
 import apiService from "../components/Api/apiService";
+import WithdrawalWarningModal from "../components/WithdrawWarning";
 
 interface WithdrawalMethod {
   id: string;
@@ -44,24 +39,57 @@ interface WithdrawalRequestData {
 const WithdrawalPage: React.FC = () => {
   // State for the withdrawal flow
   const [showWithdrawalForm, setShowWithdrawalForm] = useState<boolean>(false);
-  const [selectedMethod, setSelectedMethod] = useState<WithdrawalMethod | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<WithdrawalMethod | null>(
+    null
+  );
   const [withdrawalAmount, setWithdrawalAmount] = useState<string>(""); // Use string for input flexibility
   const [destinationAddress, setDestinationAddress] = useState<string>("");
   const [accountNumber, setAccountNumber] = useState<string>("");
   const [routingNumber, setRoutingNumber] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [pendingWithdrawals, setPendingWithdrawals] = useState<PendingWithdrawal[]>([]);
+  const [pendingWithdrawals, setPendingWithdrawals] = useState<
+    PendingWithdrawal[]
+  >([]);
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
+  const [showWarningModal, setShowWarningModal] = useState<boolean>(false);
 
   // Get balance from context
-  const { balances } = useContext(BalanceContext);
+  const {
+    balances,
+    //  refreshBalances
+  } = useContext(BalanceContext);
 
   // Get primary balance
   const getPrimaryBalance = () => {
-    if (!balances || balances.length === 0) return { amount: "0", currency: "USD" };
+    if (!balances || balances.length === 0)
+      return { amount: "0", currency: "USD" };
     const usdBalance = balances.find((b) => b.currency === "USD");
     return usdBalance || balances[0];
+  };
+
+  // Add this function to your component
+  const handleWithdrawalClick = () => {
+    // Check if user has open positions (you'll need to implement this check)
+    const hasOpenPositions = true; // Replace with actual check from your API/state
+
+    if (hasOpenPositions) {
+      setShowWarningModal(true);
+    } else {
+      // If no open positions, proceed with normal form submission
+      handleWithdrawalSubmit({ preventDefault: () => {} } as React.FormEvent);
+    }
+  };
+
+  const handleProceedAfterWarning = () => {
+    // Here you would close positions via API call
+    // closeAllPositions().then(() => {
+    //   handleWithdrawalSubmit(new Event('submit') as React.FormEvent);
+    // });
+
+    // For now, just close the modal and proceed with withdrawal
+    setShowWarningModal(false);
+    handleWithdrawalSubmit({ preventDefault: () => {} } as React.FormEvent);
   };
 
   const balance = getPrimaryBalance();
@@ -104,7 +132,7 @@ const WithdrawalPage: React.FC = () => {
         const withdrawals = await apiService.getWithdrawals();
 
         // Convert API response to our format if needed
-        const pendingWithdrawals: any [] = Array.isArray(withdrawals)
+        const pendingWithdrawals: any[] = Array.isArray(withdrawals)
           ? withdrawals.map((w) => ({
               id: w.id?.toString() || Math.random().toString(36).substring(7),
               amount: parseFloat(w.amount || "0"),
@@ -120,7 +148,9 @@ const WithdrawalPage: React.FC = () => {
         setPendingWithdrawals(pendingWithdrawals);
       } catch (err) {
         console.error("Failed to load withdrawals:", err);
-        setError("Failed to load pending withdrawals. Please refresh the page.");
+        setError(
+          "Failed to load pending withdrawals. Please refresh the page."
+        );
       } finally {
         setIsLoading(false);
       }
@@ -205,7 +235,8 @@ const WithdrawalPage: React.FC = () => {
       const response = await apiService.createWithdrawal(withdrawalData);
 
       // Generate a random ID if the API doesn't return one
-      const withdrawalId = response?.id || Math.random().toString(36).substring(7);
+      const withdrawalId =
+        response?.id || Math.random().toString(36).substring(7);
 
       // Add to local state
       const newWithdrawal: PendingWithdrawal = {
@@ -237,7 +268,9 @@ const WithdrawalPage: React.FC = () => {
       // await refreshBalances();
     } catch (err) {
       console.error("Withdrawal request failed:", err);
-      setError("Failed to process your withdrawal request. Please try again later.");
+      setError(
+        "Failed to process your withdrawal request. Please try again later."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -260,7 +293,9 @@ const WithdrawalPage: React.FC = () => {
           <CardContent className="p-6">
             <div className="p-4 border rounded-lg">
               <p className="text-sm text-gray-500">Available Balance</p>
-              <p className="text-2xl font-bold">${availableBalance.toFixed(2)} USD</p>
+              <p className="text-2xl font-bold">
+                ${availableBalance.toFixed(2)} USD
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -353,7 +388,8 @@ const WithdrawalPage: React.FC = () => {
             </CardHeader>
             <CardContent className="p-6">
               <p className="text-gray-700 mb-4">
-                Select your preferred withdrawal method. All withdrawals are subject to review and approval.
+                Select your preferred withdrawal method. All withdrawals are
+                subject to review and approval.
               </p>
               <ul className="grid md:grid-cols-2 gap-4">
                 {withdrawalMethods.map((method) => (
@@ -390,10 +426,21 @@ const WithdrawalPage: React.FC = () => {
                   Important Information
                 </h3>
                 <ul className="mt-2 space-y-1 text-sm text-blue-700">
-                  <li>• All withdrawals are subject to review and approval by our team</li>
-                  <li>• Processing time may take up to 3-5 business days depending on the method</li>
-                  <li>• Withdrawals can only be made to accounts in your name</li>
-                  <li>• Verification documents may be required for large withdrawals</li>
+                  <li>
+                    • All withdrawals are subject to review and approval by our
+                    team
+                  </li>
+                  <li>
+                    • Processing time may take up to 3-5 business days depending
+                    on the method
+                  </li>
+                  <li>
+                    • Withdrawals can only be made to accounts in your name
+                  </li>
+                  <li>
+                    • Verification documents may be required for large
+                    withdrawals
+                  </li>
                 </ul>
               </div>
 
@@ -405,7 +452,9 @@ const WithdrawalPage: React.FC = () => {
                   <div className="p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-2">
                       <Wallet className="w-5 h-5 text-blue-500" />
-                      <span className="font-medium">{selectedMethod?.name}</span>
+                      <span className="font-medium">
+                        {selectedMethod?.name}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -419,12 +468,19 @@ const WithdrawalPage: React.FC = () => {
                     value={withdrawalAmount}
                     onChange={(e) => setWithdrawalAmount(e.target.value)} // Allow any input
                     min={selectedMethod?.minAmount || 5} // Minimum withdrawal is $5
-                    max={Math.min(selectedMethod?.maxAmount || 10000, availableBalance)}
+                    max={Math.min(
+                      selectedMethod?.maxAmount || 10000,
+                      availableBalance
+                    )}
                     className="w-full p-3 border rounded-lg"
                     required
                   />
                   <p className="mt-1 text-sm text-gray-500">
-                    Min: ${selectedMethod?.minAmount} | Max: ${Math.min(selectedMethod?.maxAmount || 10000, availableBalance)}
+                    Min: ${selectedMethod?.minAmount} | Max: $
+                    {Math.min(
+                      selectedMethod?.maxAmount || 10000,
+                      availableBalance
+                    )}
                   </p>
                 </div>
 
@@ -442,7 +498,8 @@ const WithdrawalPage: React.FC = () => {
                       required
                     />
                     <p className="mt-1 text-xs text-gray-500">
-                      Please double-check your address. We are not responsible for funds sent to incorrect addresses.
+                      Please double-check your address. We are not responsible
+                      for funds sent to incorrect addresses.
                     </p>
                   </div>
                 )}
@@ -495,8 +552,9 @@ const WithdrawalPage: React.FC = () => {
 
                 <div className="pt-4 flex flex-wrap gap-4">
                   <button
-                    type="submit"
+                    type="button" // Changed from submit to button
                     disabled={isLoading}
+                    onClick={handleWithdrawalClick} // Use new handler instead of form submission
                     className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex justify-center items-center"
                   >
                     {isLoading ? "Processing..." : "Request Withdrawal"}
@@ -514,6 +572,11 @@ const WithdrawalPage: React.FC = () => {
           </Card>
         )}
       </div>
+      <WithdrawalWarningModal 
+  isOpen={showWarningModal}
+  onClose={() => setShowWarningModal(false)}
+  onProceed={handleProceedAfterWarning}
+/>
     </>
   );
 };

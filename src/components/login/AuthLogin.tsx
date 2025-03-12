@@ -1,8 +1,9 @@
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, FormEvent, ChangeEvent, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import VerificationModal from "./verifyModal";
 import { useAuth } from "../../auth/AuthContext";
 import apiService from "../Api/apiService";
+import { BalanceContext } from "../balance/BalanceContext";
 
 interface LoginData {
   email: string;
@@ -30,6 +31,9 @@ interface LoginModalProps {
 }
 
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
+  const balanceContext = useContext(BalanceContext);
+  const { refreshBalances } = balanceContext || {};
+
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   const [loginData, setLoginData] = useState<LoginData>({
     email: "",
@@ -176,6 +180,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         onClose();
         sign();
         navigate("/home");
+        if (refreshBalances) {
+          refreshBalances(); // Refresh balances after signup if available
+        }
       } else {
         setError("Login failed: No token received");
       }
@@ -202,7 +209,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       const response = await apiService.signup(signupData);
       if (response && response.message) {
         setVerificationModalOpen(true);
-        alert("Signup successful! Please verify your email with the OTP sent.");
+        // alert("Signup successful! Please verify your email with the OTP sent.");
       } else {
         setError("Signup failed.");
       }
@@ -239,6 +246,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           onClose();
           sign();
           navigate("/home"); // Navigate to home
+          if (refreshBalances) {
+            refreshBalances(); // Refresh balances after signup if available
+          }
         }
         alert("OTP verified. You are now logged in.");
       } else {

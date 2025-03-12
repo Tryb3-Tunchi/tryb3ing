@@ -20,26 +20,37 @@ const DashboardNav: React.FC = () => {
     useContext(BalanceContext);
 
   // Use our wallet connect hook
-  const { 
-    connectedWallet, 
-    openWalletModal, 
-    disconnectWallet, 
-    WalletConnectModal 
+  const {
+    connectedWallet,
+    openWalletModal,
+    disconnectWallet,
+    WalletConnectModal,
   } = useWalletConnect();
 
   // Get the displayed balance based on account type (real/demo)
   const getDisplayedBalance = () => {
     if (balances && balances.length > 0) {
       const displayBalance = isAccountReal
-        ? balances.find((b) => b.currency === "USD") || balances[0] // Default to first balance if USD not found
+        ? balances.find((b) => b.currency === "USD") || balances[0]
         : balances.find((b) => b.currency === "DEMO") || balances[0];
-        // : balances.find((b) => b.currency === "DEMO") || balances[0];
 
-      return `$${parseFloat(displayBalance.amount).toFixed(2)}`;
+      // Ensure the balance exists and has an amount
+      if (displayBalance && displayBalance.amount) {
+        // Handle potential parsing issues
+        try {
+          const amount = parseFloat(displayBalance.amount);
+          if (!isNaN(amount)) {
+            return `$${amount.toFixed(2)}`;
+          }
+        } catch (e) {
+          console.error("Error parsing balance amount:", e);
+        }
+      }
+      // Return a placeholder if parsing fails
+      return "$0.00";
     }
-    return "$0.00";
+    return "$0.00"; // Fallback if no balances are available
   };
-
   // Toggle between real and demo account and refresh balances
   const toggleAccountType = async () => {
     setAccountReal((prev) => !prev);
@@ -85,7 +96,9 @@ const DashboardNav: React.FC = () => {
   const getDisplayWalletAddress = () => {
     if (!connectedWallet) return null;
     const { address } = connectedWallet;
-    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+    return `${address.substring(0, 6)}...${address.substring(
+      address.length - 4
+    )}`;
   };
 
   return (
@@ -101,7 +114,7 @@ const DashboardNav: React.FC = () => {
             <Menu className="h-6 w-6 font-semibold" />
           </button>
 
-          <img src="/logo.png" alt="Logo" className="h-10 w-10" />
+          {/* <img src="/LOGO1.png" alt="Logo" className="h-10 w-10 pt-2 md:h-0 md:w-0" /> */}
 
           <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-2">
             <span className="text-xl text-gray-500 hidden lg:block">
@@ -138,7 +151,7 @@ const DashboardNav: React.FC = () => {
           </Link>
 
           {connectedWallet ? (
-            <button 
+            <button
               onClick={disconnectWallet}
               className="px-2 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center font-semibold"
             >
@@ -146,7 +159,7 @@ const DashboardNav: React.FC = () => {
               {getDisplayWalletAddress()}
             </button>
           ) : (
-            <button 
+            <button
               onClick={openWalletModal}
               className="px-2 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 flex items-center font-semibold"
             >
@@ -183,7 +196,7 @@ const DashboardNav: React.FC = () => {
                   <div className="px-4 py-2 text-sm text-gray-600 border-t border-b">
                     <p className="font-semibold">Connected wallet:</p>
                     <p className="truncate">{connectedWallet.address}</p>
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         disconnectWallet();
@@ -234,7 +247,7 @@ const DashboardNav: React.FC = () => {
                 <div className="px-4 py-2 text-sm text-gray-600 border-t border-b">
                   <p className="font-semibold">Connected wallet:</p>
                   <p className="truncate">{connectedWallet.address}</p>
-                  <button 
+                  <button
                     onClick={(e) => {
                       e.stopPropagation();
                       disconnectWallet();
@@ -313,10 +326,14 @@ const DashboardNav: React.FC = () => {
             {/* Connected Wallet Display in Sidebar */}
             {connectedWallet && (
               <div className="px-6 py-3 border-t border-b my-2">
-                <div className="text-sm mb-1 font-semibold text-gray-500">Wallet Connected</div>
+                <div className="text-sm mb-1 font-semibold text-gray-500">
+                  Wallet Connected
+                </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm truncate">{getDisplayWalletAddress()}</span>
-                  <button 
+                  <span className="text-sm truncate">
+                    {getDisplayWalletAddress()}
+                  </span>
+                  <button
                     onClick={disconnectWallet}
                     className="text-xs text-red-500 hover:underline"
                   >
@@ -341,7 +358,7 @@ const DashboardNav: React.FC = () => {
               </Link>
 
               {connectedWallet ? (
-                <button 
+                <button
                   onClick={disconnectWallet}
                   className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center font-semibold"
                 >
@@ -349,7 +366,7 @@ const DashboardNav: React.FC = () => {
                   Connected: {getDisplayWalletAddress()}
                 </button>
               ) : (
-                <button 
+                <button
                   onClick={openWalletModal}
                   className="w-full px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 flex items-center justify-center font-semibold"
                 >

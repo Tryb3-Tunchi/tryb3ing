@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import VerificationModal from "../../components/login/verifyModal";
 import apiService from "../Api/apiService";
 import { useAuth } from "../../auth/AuthContext";
+import { BalanceContext } from "../balance/BalanceContext";
 
 const SignInPage = () => {
+  const balanceContext = useContext(BalanceContext);
+  const { refreshBalances } = balanceContext || {};
+
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -79,6 +83,9 @@ const SignInPage = () => {
         }
         sign();
         navigate("/home");
+        if (refreshBalances) {
+          refreshBalances(); // Refresh balances after signup if available
+        }
       }
     } catch (error) {
       console.error("Login failed:", error);
@@ -188,7 +195,7 @@ const SignInPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tl from-blue-50 via-indigo-50 to-purple-50 px-4 py-12 relative overflow-hidden">
+    <div className="min-h-screen mt-20 flex items-center justify-center bg-gradient-to-tl from-blue-50 via-indigo-50 to-purple-50 px-4 py-12 relative overflow-hidden">
       {/* Mobile background effect */}
       <div className=" inset-0 md:hidden">
         <div className=" inset-0 bg-blue-500 opacity-5">
@@ -388,9 +395,9 @@ const SignInPage = () => {
             className="w-full max-w-sm mb-8 rounded-lg shadow-lg"
           />
           <h2 className="text-3xl font-bold mb-4">Hello, Friend!</h2>
-            <p className="text-blue-100 text-center">
+          <p className="text-blue-100 text-center">
             Continue on your trading journey and reach for the moon!
-            </p>
+          </p>
         </div>
       </div>
 

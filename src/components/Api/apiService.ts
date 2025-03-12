@@ -21,15 +21,15 @@ interface Balance {
   [key: string]: any;
 }
 
-interface BalanceResponse {
-  count?: number;
-  next?: string | null;
-  previous?: string | null;
-  results?: Balance[];
-  id?: number;
-  amount?: string;
-  user?: number;
-}
+// interface BalanceResponse {
+//   count?: number;
+//   next?: string | null;
+//   previous?: string | null;
+//   results?: Balance[];
+//   id?: number;
+//   amount?: string;
+//   user?: number;
+// }
 
 interface Deposit {
   id?: number;
@@ -37,6 +37,7 @@ interface Deposit {
   status?: string;
   timestamp?: string;
   user?: number;
+  is_verified?: boolean; // Add is_verified field
   [key: string]: any;
 }
 
@@ -339,24 +340,42 @@ class ApiService {
   // Balance Methods
   public async getBalances(): Promise<Balance[]> {
     try {
-      const response = await this.fetch<BalanceResponse>("/api/balance/");
-
-      // Handle both formats: single object or array in results
-      if (response.results) {
+      const response = await this.fetch<any>("/api/balance/");
+      console.log("Raw balance response:", response);
+  
+      // Handle nested array structure that API is returning
+      if (Array.isArray(response) && response.length > 0) {
+        // Handle the case where response is an array of arrays
+        if (Array.isArray(response[0])) {
+          return response[0].map((balance: any) => ({
+            ...balance,
+            currency: balance.currency || "USD" // Add default currency
+          }));
+        }
+        // Handle case where response is a direct array of balance objects
+        return response.map((balance: any) => ({
+          ...balance,
+          currency: balance.currency || "USD"
+        }));
+      }
+      // Handle standard results format
+      else if (response.results) {
         return response.results;
-      } else if (response.id !== undefined && response.amount !== undefined) {
-        // Format the single balance object to include currency
+      }
+      // Handle single balance object
+      else if (response.id !== undefined && response.amount !== undefined) {
         const balance: Balance = {
           id: response.id,
           amount: response.amount,
           user: response.user,
-          currency: "USD", // Default currency
+          currency: "USD" // Default currency
         };
         return [balance];
-      } else {
-        // If we have a different format (e.g. a direct balance object)
-        // that matches our Balance interface, return it as an array
-        return [response as unknown as Balance];
+      }
+      // If response format doesn't match any expected format
+      else {
+        console.warn("Unexpected balance response format:", response);
+        return [];
       }
     } catch (error) {
       console.error("Error fetching balances:", error);
@@ -402,19 +421,19 @@ class ApiService {
     return this.fetch<Deposit>(`/api/deposits/${id}/`);
   }
 
-  
-public async createDeposit(depositData: { amount: number; method: string; cryptoType?: string; status: string }): Promise<Deposit> {
+  public async createDeposit(depositData: { amount: number; method: string; cryptoType?: string; status: string }): Promise<Deposit> {
+    return this.fetch<Deposit>("/api/deposits/", {
+      method: "POST",
+      body: JSON.stringify(depositData),
+    });
+  }
 
-  return this.fetch<Deposit>("/api/deposits/", {
-
-    method: "POST",
-
-    body: JSON.stringify(depositData),
-
-  });
-
-}
-
+  // Add verifyDeposit method
+  public async verifyDeposit(id: number): Promise<Deposit> {
+    return this.fetch<Deposit>(`/api/deposits/${id}/verify/`, {
+      method: "POST",
+    });
+  }
 
   public async updateDeposit(
     id: number,
@@ -485,52 +504,48 @@ public async createDeposit(depositData: { amount: number; method: string; crypto
     });
   }
 
-  // Add these methods to the ApiService class
+  // Profile Methods
+  public async getProfile(): Promise<any> {
+    return this.fetch<any>("/auth/profile/", {
+      method: "GET",
+    });
+  }
 
-// Profile Methods
-public async getProfile(): Promise<any> {
-  return this.fetch<any>("/auth/profile/", {
-    method: "GET",
-  });
+  public async requestEmailChange(email: string): Promise<any> {
+    return this.fetch<any>("/auth/profile/request-email-change/", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  public async requestProfileChange(profileData: any): Promise<any> {
+    return this.fetch<any>("/auth/profile/request-profile-change/", {
+      method: "POST",
+      body: JSON.stringify(profileData),
+    });
+  }
+
+  public async resendEmailChangeOtp(email: string): Promise<any> {
+    return this.fetch<any>("/auth/profile/resend-email-change-otp/", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  public async verifyEmailChange(email: string, otp: string): Promise<any> {
+    return this.fetch<any>("/auth/profile/verify-email-change/", {
+      method: "POST",
+      body: JSON.stringify({ email, otp }),
+    });
+  }
+
+  public async verifyProfileChange(profileData: any, otp: string): Promise<any> {
+    return this.fetch<any>("/auth/profile/verify-profile-change/", {
+      method: "POST",
+      body: JSON.stringify({ ...profileData, otp }),
+    });
+  }
 }
-
-public async requestEmailChange(email: string): Promise<any> {
-  return this.fetch<any>("/auth/profile/request-email-change/", {
-    method: "POST",
-    body: JSON.stringify({ email }),
-  });
-}
-
-public async requestProfileChange(profileData: any): Promise<any> {
-  return this.fetch<any>("/auth/profile/request-profile-change/", {
-    method: "POST",
-    body: JSON.stringify(profileData),
-  });
-}
-
-public async resendEmailChangeOtp(email: string): Promise<any> {
-  return this.fetch<any>("/auth/profile/resend-email-change-otp/", {
-    method: "POST",
-    body: JSON.stringify({ email }),
-  });
-}
-
-public async verifyEmailChange(email: string, otp: string): Promise<any> {
-  return this.fetch<any>("/auth/profile/verify-email-change/", {
-    method: "POST",
-    body: JSON.stringify({ email, otp }),
-  });
-}
-
-public async verifyProfileChange(profileData: any, otp: string): Promise<any> {
-  return this.fetch<any>("/auth/profile/verify-profile-change/", {
-    method: "POST",
-    body: JSON.stringify({ ...profileData, otp }),
-  });
-}
-}
-
-
 
 // Create a singleton instance
 const apiService = new ApiService();
