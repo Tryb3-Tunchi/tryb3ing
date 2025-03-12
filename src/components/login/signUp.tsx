@@ -157,11 +157,7 @@ const SignUpPage = () => {
     <div className="min-h-screen flex items-center mt-20 justify-center bg-gradient-to-br from-blue-50 to-indigo-50 px-4 py-12">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -left-64 top-0">
-          <img
-            src="clothASL1.png"
-            alt="Decorative left"
-            className="opacity-10"
-          />
+          <img src="img3.png" alt="Decorative left" className="opacity-10" />
         </div>
         <div className="absolute -right-64 bottom-0">
           <img
@@ -175,14 +171,14 @@ const SignUpPage = () => {
       <div className="max-w-4xl w-full mx-auto bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
         <div className="md:w-1/2 bg-blue-600 p-8 hidden md:flex flex-col justify-center items-center text-white">
           <img
-            src="clothASL1.png"
+            src="img1.png"
             alt="Sign up illustration"
             className="w-full max-w-sm mb-8 rounded-lg shadow-lg"
           />
           <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
-          <p className="text-blue-100 text-center">
-            Enjoy Luxury and Unbeatable Fashion Style
-          </p>
+            <p className="text-blue-100 text-center">
+            Invest Smart, Trade Confidently
+            </p>
         </div>
 
         <div className="md:w-1/2 p-8">

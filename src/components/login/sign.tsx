@@ -383,14 +383,14 @@ const SignInPage = () => {
 
         <div className="md:w-1/2 bg-blue-600 p-8 hidden md:flex flex-col justify-center items-center text-white">
           <img
-            src="clothASL2.png"
+            src="img2.svg"
             alt="Login illustration"
             className="w-full max-w-sm mb-8 rounded-lg shadow-lg"
           />
           <h2 className="text-3xl font-bold mb-4">Hello, Friend!</h2>
-          <p className="text-blue-100 text-center">
-            Enter your personal details and start your journey with us
-          </p>
+            <p className="text-blue-100 text-center">
+            Continue on your trading journey and reach for the moon!
+            </p>
         </div>
       </div>
 
