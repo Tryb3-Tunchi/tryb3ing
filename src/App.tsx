@@ -16,6 +16,7 @@ import ProfilePage from "./pages/Profile";
 import AdminDashboard from "./pages/Admin/AdminPages";
 import LoginModal from "./components/login/AuthLogin";
 import Withdrawal from "./pages/Withdrawal";
+import ProtectedRoute from "./auth/ProtectAuth";
 
 function App() {
   return (
@@ -28,16 +29,88 @@ function App() {
           <Route index element={<Home />} />
           <Route path="signin" element={<SignInPage />} />
           <Route path="signup" element={<SignUpPage />} />
-          <Route path="home" element={<MainHome />} />
-          <Route path="verify" element={<VerifyDetails />} />
-          <Route path="account" element={<MyAccount />} />
-          <Route path="funding" element={<FundingPage />} />
-          <Route path="withdraw" element={<Withdrawal />} />
-          <Route path="trade" element={<CopyTradingSection />} />
-          <Route path="Refer-friend" element={<ReferFriendPage />} />
-          <Route path="market" element={<MarketDashboard />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="admin" element={<AdminDashboard />} />
+          <Route
+            path="home"
+            element={
+              <ProtectedRoute>
+                <MainHome />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="verify"
+            element={
+              <ProtectedRoute>
+                <VerifyDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="account"
+            element={
+              <ProtectedRoute>
+                <MyAccount />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="funding"
+            element={
+              <ProtectedRoute>
+                <FundingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="withdraw"
+            element={
+              <ProtectedRoute>
+                <Withdrawal />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="trade"
+            element={
+              <ProtectedRoute>
+                <CopyTradingSection />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="Refer-friend"
+            element={
+              <ProtectedRoute>
+                <ReferFriendPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="market"
+            element={
+              <ProtectedRoute>
+                <MarketDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="login"
             element={<LoginModal isOpen={true} onClose={() => {}} />}
