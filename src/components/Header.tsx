@@ -17,7 +17,7 @@ const Navbar = () => {
   const languages = ["English", "Español", "Français", "中文"];
 
   const tradingSubmenu = {
-    ACCOUNTS: ["Account Types"],
+    ACCOUNTS: ["Learn More On Account Types"],
     MARKETS: [
       "Forex Trading",
       "Cryptocurrencies",
@@ -74,10 +74,10 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#" className="hover:text-blue-600">
+            <a href="/trading" className="hover:text-blue-600">
               Trading
             </a>
-            <a href="#" className="hover:text-blue-600">
+            <a href="discover" className="hover:text-blue-600">
               Discover
             </a>
             {/* Trading Menu */}
@@ -99,7 +99,7 @@ const Navbar = () => {
                         {tradingSubmenu.ACCOUNTS.map((item) => (
                           <a
                             key={item}
-                            href="#"
+                            href="/promotions"
                             className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors"
                           >
                             {item}
@@ -113,7 +113,7 @@ const Navbar = () => {
                         {tradingSubmenu.MARKETS.map((item) => (
                           <a
                             key={item}
-                            href="#"
+                            href="/markets"
                             className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors"
                           >
                             {item}

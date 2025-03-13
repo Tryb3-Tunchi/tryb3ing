@@ -17,6 +17,10 @@ import AdminDashboard from "./pages/Admin/AdminPages";
 import LoginModal from "./components/login/AuthLogin";
 import Withdrawal from "./pages/Withdrawal";
 import ProtectedRoute from "./auth/ProtectAuth";
+import DiscoverPage from "./pages/static pages/discoverPage";
+import PromotionsCompanyPage from "./pages/static pages/promoPage";
+import TradingPage from "./pages/static pages/tradingPage";
+import MarketsPage from "./pages/static pages/marketPage";
 
 function App() {
   return (
@@ -29,6 +33,15 @@ function App() {
           <Route index element={<Home />} />
           <Route path="signin" element={<SignInPage />} />
           <Route path="signup" element={<SignUpPage />} />
+
+
+          <Route path="discover" element={<DiscoverPage />} />
+          <Route path="promotions" element={<PromotionsCompanyPage />} />
+          <Route path="trading" element={<TradingPage />} />
+          <Route path="markets" element={<MarketsPage />} />
+
+
+
           <Route
             path="home"
             element={
