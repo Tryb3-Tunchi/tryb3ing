@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronDown, X, Globe, Menu } from "lucide-react";
 // import { Link } from "react-router-dom";
 import LoginModal from "./login/AuthLogin";
@@ -8,6 +8,11 @@ const Navbar = () => {
   const [isTradingOpen, setIsTradingOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  // Create refs for dropdown containers
+  const tradingMenuRef = useRef<HTMLDivElement>(null);
+  const langMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   const languages = ["English", "Español", "Français", "中文"];
 
@@ -26,6 +31,34 @@ const Navbar = () => {
       "Thematic Indices",
     ],
   };
+
+  // Handle click outside to close dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Close trading dropdown if clicked outside
+      if (tradingMenuRef.current && !tradingMenuRef.current.contains(event.target)) {
+        setIsTradingOpen(false);
+      }
+      
+      // Close language dropdown if clicked outside
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target)) {
+        setIsLangOpen(false);
+      }
+      
+      // Close mobile menu if clicked outside
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    // Add event listener
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    // Cleanup event listener on component unmount
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <nav className="fixed top-0 w-full py-3 bg-white shadow-md z-50">
@@ -48,7 +81,7 @@ const Navbar = () => {
               Discover
             </a>
             {/* Trading Menu */}
-            <div className="relative">
+            <div className="relative" ref={tradingMenuRef}>
               <button
                 onClick={() => setIsTradingOpen(!isTradingOpen)}
                 className="flex items-center hover:text-blue-600"
@@ -97,7 +130,7 @@ const Navbar = () => {
           {/* Right Side Items */}
           <div className="hidden md:flex items-center space-x-4">
             {/* Language Selector */}
-            <div className="relative">
+            <div className="relative" ref={langMenuRef}>
               <button
                 onClick={() => setIsLangOpen(!isLangOpen)}
                 className="flex items-center px-3 py-2 hover:text-blue-600"
@@ -152,7 +185,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-gray-50 border-t px-4 py-2 space-y-2">
+        <div className="md:hidden bg-gray-50 border-t px-4 py-2 space-y-2" ref={mobileMenuRef}>
           <a href="#" className="block py-2 px-4 hover:bg-blue-50 rounded-lg">
             Trading
           </a>
