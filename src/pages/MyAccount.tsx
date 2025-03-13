@@ -415,7 +415,7 @@ const MyAccount: React.FC = () => {
           className="text-gray-600 hover:text-gray-800 flex items-center space-x-2"
         >
           <span>
-            <a className="flex" href="/myaccount">
+            <a className="flex" href="/account">
               <ArrowDownRight className="w-4 h-4 mt-1 mr-2" />
               Back to Account Overview
             </a>
@@ -434,7 +434,7 @@ const MyAccount: React.FC = () => {
           <CardTitle>EUR/USD Market Chart</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* TradingView Widget */}
+          TradingView Widget
           <div className="h-[500px] w-full">
             <iframe
               src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_12345&symbol=EURUSD&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&hideideas=1&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=EURUSD"

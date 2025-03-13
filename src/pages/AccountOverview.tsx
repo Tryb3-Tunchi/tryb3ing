@@ -1,7 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import { MoreVertical, Download, Upload, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BalanceContext } from "../components/balance/BalanceContext"; // Import the BalanceContext
+import { Card, CardContent, CardHeader, CardTitle } from "../components/Card";
 // import apiService from "../components/Api/apiService"; // Import the apiService
 
 // Define interfaces for account data
@@ -289,10 +290,44 @@ const AccountOverview = () => {
           <p className="text-gray-600 mb-4">
             Open a new trading account with us
           </p>
-          <button className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold">
-            Get Started
-          </button>
+          <Link to="/signup">
+            <button className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold">
+              Get Started
+            </button>
+          </Link>
         </div>
+      </div>
+      <div className="mt-12 grid md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>EUR/USD Market Chart</CardTitle>
+          </CardHeader>
+          <CardContent>
+            TradingView Widget
+            <div className="h-[500px] w-full">
+              <iframe
+                src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_12345&symbol=EURUSD&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&hideideas=1&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=EURUSD"
+                style={{ width: "100%", height: "100%", border: "none" }}
+                title="TradingView Chart"
+              ></iframe>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>BTC/USD Market Chart</CardTitle>
+          </CardHeader>
+          <CardContent>
+            TradingView Widget
+            <div className="h-[500px] w-full">
+              <iframe
+                src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_12345&symbol=BTCUSD&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&hideideas=1&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=BTCUSD"
+                style={{ width: "100%", height: "100%", border: "none" }}
+                title="TradingView Chart"
+              ></iframe>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
