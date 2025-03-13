@@ -1,13 +1,4 @@
-
-import {
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
-  Youtube,
-  Globe,
-  AlertTriangle,
-} from "lucide-react";
+import { Globe, AlertTriangle } from "lucide-react";
 
 const MainFooter = () => {
   return (
@@ -118,7 +109,7 @@ const MainFooter = () => {
         </div>
 
         {/* Social Media */}
-        <div className="py-8 border-b border-gray-700">
+        {/* <div className="py-8 border-b border-gray-700">
           <h4 className="font-semibold text-white mb-4">Follow us:</h4>
           <div className="flex space-x-4">
             <a href="#" className="hover:text-white transition-colors">
@@ -137,7 +128,7 @@ const MainFooter = () => {
               <Youtube className="w-6 h-6" />
             </a>
           </div>
-        </div>
+        </div> */}
 
         {/* Legal Information */}
         <div className="py-8 space-y-6 text-sm">

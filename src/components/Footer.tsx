@@ -6,15 +6,7 @@ import {
   FaTiktok,
 } from "react-icons/fa";
 
-import {
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
-  Youtube,
-  Globe,
-  AlertTriangle,
-} from "lucide-react";
+import { Globe, AlertTriangle } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -43,7 +35,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      <div className="  w-full px-4  mx-auto">  
+      <div className="  w-full px-4  mx-auto">
         <footer className="bg-gray-900 text-gray-300 pt-12 pb-6">
           <div className="max-w-7xl mx-auto px-4">
             {/* Quick Links */}
@@ -150,9 +142,9 @@ export default function Footer() {
               </div>
             </div>
 
-            {/* Social Media */}
+            {/* Social Media
             <div className="py-8 border-b border-gray-700">
-              <h4 className="font-semibold text-white mb-4">Follow us:</h4>
+              <h4 className="font-semibold text-white mb-4">We Are On:</h4>
               <div className="flex space-x-4">
                 <a href="#" className="hover:text-white transition-colors">
                   <Facebook className="w-6 h-6" />
@@ -170,7 +162,7 @@ export default function Footer() {
                   <Youtube className="w-6 h-6" />
                 </a>
               </div>
-            </div>
+            </div> */}
 
             {/* Legal Information */}
             <div className="py-8 space-y-6 text-sm">
@@ -179,14 +171,14 @@ export default function Footer() {
                 <Globe className="w-5 h-5 mt-0.5 flex-shrink-0" />
                 <p>
                   <span className="font-semibold text-white">Legal:</span> This
-                  website is operated by XEX Platform with registered
-                  address at Suite 101, 63 Eve Street, Belize City, Belize. XM
-                  Global Limited, registered by the Financial Services
-                  Commission (FSC) under the Securities Industry Act 2021
-                  (license number 000261/4) and Trading Point of Financial
-                  Instruments Limited, authorised and regulated by Cyprus
-                  Securities and Exchange Commission (CySEC) (licence number
-                  120/10), are members of Trading Point Group.
+                  website is operated by XEX Platform with registered address at
+                  Suite 101, 63 Eve Street, Belize City, Belize. XM Global
+                  Limited, registered by the Financial Services Commission (FSC)
+                  under the Securities Industry Act 2021 (license number
+                  000261/4) and Trading Point of Financial Instruments Limited,
+                  authorised and regulated by Cyprus Securities and Exchange
+                  Commission (CySEC) (licence number 120/10), are members of
+                  Trading Point Group.
                 </p>
               </div>
 
@@ -211,8 +203,8 @@ export default function Footer() {
                   Restricted Regions:
                 </p>
                 <p>
-                  XEX Platform does not provide services for the residents
-                  of certain countries, such as the United States of America,
+                  XEX Platform does not provide services for the residents of
+                  certain countries, such as the United States of America,
                   Canada, Israel and the Islamic Republic of Iran.
                 </p>
               </div>
@@ -220,14 +212,14 @@ export default function Footer() {
               {/* Additional Disclaimer */}
               <div>
                 <p>
-                  XEX Platform does not direct its website and services to any individual
-                  in any country in which the use of its website and services
-                  are prohibited by local laws or regulations. When accessing
-                  this website from a country in which its use may or may not be
-                  prohibited, it is the user's responsibility to ensure that any
-                  use of the website or services adhere to local laws or
-                  regulations. XEX Platformdoes not affirm that the information on its
-                  website is suitable to all jurisdictions.
+                  XEX Platform does not direct its website and services to any
+                  individual in any country in which the use of its website and
+                  services are prohibited by local laws or regulations. When
+                  accessing this website from a country in which its use may or
+                  may not be prohibited, it is the user's responsibility to
+                  ensure that any use of the website or services adhere to local
+                  laws or regulations. XEX Platformdoes not affirm that the
+                  information on its website is suitable to all jurisdictions.
                 </p>
               </div>
 
@@ -245,8 +237,7 @@ export default function Footer() {
             {/* Copyright */}
             <div className="pt-6 border-t border-gray-700 text-center text-sm">
               <p>
-                © {new Date().getFullYear()} XEX Platform. All rights
-                reserved.
+                © {new Date().getFullYear()} XEX Platform. All rights reserved.
               </p>
             </div>
           </div>
