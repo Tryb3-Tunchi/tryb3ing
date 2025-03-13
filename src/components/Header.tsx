@@ -186,10 +186,10 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-gray-50 border-t px-4 py-2 space-y-2" ref={mobileMenuRef}>
-          <a href="#" className="block py-2 px-4 hover:bg-blue-50 rounded-lg">
+          <a href="/trading" className="block py-2 px-4 hover:bg-blue-50 rounded-lg">
             Trading
           </a>
-          <a href="#" className="block py-2 px-4 hover:bg-blue-50 rounded-lg">
+          <a href="/discover" className="block py-2 px-4 hover:bg-blue-50 rounded-lg">
             Discover
           </a>
 
@@ -217,7 +217,7 @@ const Navbar = () => {
                     {tradingSubmenu.ACCOUNTS.map((item) => (
                       <a
                         key={item}
-                        href="#"
+                        href="/promotions"
                         className="block py-2 px-4 text-gray-600 hover:bg-blue-50 rounded-lg"
                       >
                         {item}
@@ -231,7 +231,7 @@ const Navbar = () => {
                     {tradingSubmenu.MARKETS.map((item) => (
                       <a
                         key={item}
-                        href="#"
+                        href="/markets"
                         className="block py-2 px-4 text-gray-600 hover:bg-blue-50 rounded-lg"
                       >
                         {item}
