@@ -49,12 +49,17 @@ const Overview = () => {
 
         // Create promises for all symbol requests
         const requests = symbols.map((symbol) =>
-          fetch(`https://api.twelvedata.com/price?symbol=${symbol}&apikey=${apiKey}`)
+          fetch(
+            `https://api.twelvedata.com/price?symbol=${symbol}&apikey=${apiKey}`
+          )
             .then((response) => response.json())
             .then((data) => ({
               symbol,
               price: parseFloat(data.price).toFixed(2),
-              change: (Math.random() > 0.5 ? "+" : "-") + (Math.random() * 2).toFixed(2) + "%", // Simulating change percentage
+              change:
+                (Math.random() > 0.5 ? "+" : "-") +
+                (Math.random() * 2).toFixed(2) +
+                "%", // Simulating change percentage
             }))
             .catch((error) => {
               console.error(`Error fetching ${symbol}:`, error);
@@ -64,7 +69,9 @@ const Overview = () => {
 
         // Wait for all requests to complete
         const results = await Promise.all(requests);
-        setPriceData(results.filter((item): item is PriceData => item !== null)); // Filter out null values
+        setPriceData(
+          results.filter((item): item is PriceData => item !== null)
+        ); // Filter out null values
       } catch (error) {
         console.error("Error fetching price data:", error);
       } finally {
@@ -104,12 +111,17 @@ const Overview = () => {
           >
             {/* Duplicate the price data array to create seamless loop */}
             {[...priceData, ...priceData].map((item, index) => (
-              <div key={index} className="flex-shrink-0 flex items-center space-x-2">
+              <div
+                key={index}
+                className="flex-shrink-0 flex items-center space-x-2"
+              >
                 <span className="font-bold text-white">{item.symbol}</span>
                 <span className="text-white">{item.price}</span>
                 <span
                   className={
-                    item.change.startsWith("+") ? "text-green-400" : "text-red-400"
+                    item.change.startsWith("+")
+                      ? "text-green-400"
+                      : "text-red-400"
                   }
                 >
                   {item.change}
@@ -159,8 +171,8 @@ const Overview = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-white px-4 mt-8">
-        <div className="text-center max-w-4xl mx-auto space-y-6">
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-white px-4 ">
+        <div className="text-center max-w-4xl mx-auto space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Trusted by over 15 Million Traders
           </h1>
@@ -168,11 +180,11 @@ const Overview = () => {
             The Most Awarded Broker for a Reason
           </h2>
           <p className="text-xl md:text-2xl mb-8">
-            We offer a superior trading environment that puts traders in the best
-            position to profit.
+            We offer a superior trading environment that puts traders in the
+            best position to profit.
           </p>
           <Link to="/signup">
-            <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 my-6 px-8 rounded-full transition-all duration-300 transform hover:scale-105">
+            <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 my-4 px-4 rounded-full transition-all duration-300 transform hover:scale-105">
               Get Your Welcome Bonus**Limited-Time Offer
             </button>
           </Link>
