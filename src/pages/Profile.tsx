@@ -138,7 +138,7 @@ const ProfilePage = () => {
       <DashboardNav />
       <div className="flex pt-20 min-h-screen bg-gray-50">
         {/* Sidebar */}
-        <div className="w-64 bg-white border-r">
+        <div className="w-48 bg-white border-r">
           <div className="p-4 border-b">
             <div className="flex items-center space-x-2">
               <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
@@ -157,7 +157,7 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          <nav className="p-2">
+          <nav className="space-y-1 mt-4">
             {sidebarItems.map((item) => (
               <Link
                 key={item.label}
@@ -166,7 +166,7 @@ const ProfilePage = () => {
               >
                 <button
                   onClick={() => setActiveTab(item.label)}
-                  className={`w-full flex items-center space-x-2 px-4 py-2 rounded-lg text-left ${
+                  className={`w-full flex items-center space-x-2 px-2 py-2 rounded-lg text-left ${
                     activeTab === item.label
                       ? "bg-blue-50 text-blue-600"
                       : "text-gray-700 hover:bg-gray-50"
@@ -181,7 +181,7 @@ const ProfilePage = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-1">
           <div className="max-w-3xl mx-auto">
             {error && (
               <Alert className="mb-6">

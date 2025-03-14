@@ -238,7 +238,7 @@ const DashboardNav: React.FC = () => {
                 Profile
               </Link>
               <Link
-                to="/settings"
+                to="/profile"
                 className="block px-4 py-2 hover:bg-gray-100 font-semibold"
               >
                 Settings
