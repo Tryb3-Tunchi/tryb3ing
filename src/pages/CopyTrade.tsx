@@ -8,7 +8,7 @@ const CopyTradingSection = () => {
   return (
     <>
       <DashboardNav />
-      <div className="w-full mt-16 bg-white">
+      <div className="max-w-6xl mx-auto p-4 w-full mt-20 bg-white">
         {/* Hero Section */}
         <div className="relative bg-blue-600 mt-2  text-white py-20 ">
           <div className="max-w-6xl mx-auto px-4">

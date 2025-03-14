@@ -50,9 +50,9 @@ const ProfilePage = () => {
     { icon: User, path: "/profile", label: "Profile" },
     { icon: FileText, path: "/verify", label: "Financial Information" },
     { icon: FileText, path: "/verify", label: "Upload Documents" },
-    { icon: Shield, path: "", label: "Settings & Security" },
-    { icon: Scale, path: "/settings", label: "Legal" },
-    { icon: LifeBuoy, path: "/support", label: "Support" },
+    { icon: Shield, path: "/profile", label: "Settings & Security" },
+    { icon: Scale, path: "/discover", label: "Legal" },
+    { icon: LifeBuoy, path: "/promotions", label: "Support" },
   ];
 
   // Fetch profile data on component mount

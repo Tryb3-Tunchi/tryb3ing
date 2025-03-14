@@ -36,7 +36,7 @@ const ReferFriendPage = () => {
   return (
     <>
       <DashboardNav />
-      <div className="max-w-6xl mt-20 mx-auto p-4">
+      <div className="max-w-6xl mx-auto p-4 w-full mt-20 bg-white ">
         {/* Navigation */}
         <div className="flex items-center space-x-2 mb-6">
           <Link to="/home">
@@ -46,7 +46,7 @@ const ReferFriendPage = () => {
           <span className="text-gray-900">History</span>
         </div>
 
-        <div className="grid md:grid-cols-4 pb-16 gap-6">
+        <div className="">
           {/* Left Sidebar */}
           <div className="md:col-span-1">
             <Card className="mb-4">
