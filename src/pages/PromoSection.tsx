@@ -1,4 +1,3 @@
-
 import { Gift, Trophy, Users, BookOpen, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -14,9 +13,9 @@ const PromoSection = () => {
               <div className="inline-block bg-blue-500 text-xs font-bold px-2 py-1 rounded mb-2">
                 NEW
               </div>
-              <h3 className="text-xl font-bold mb-2">XM Refer a Friend</h3>
+              <h3 className="text-xl font-bold mb-2">XEX Refer a Friend</h3>
               <p className="mb-4">
-                Are you a proud XM client? Why not spread the word about XM?
+                Are you a proud XEX client? Why not spread the word about XEX ?
                 Invite your friends to start trading with us and earn up to $70
                 for each person you refer.
               </p>
@@ -41,7 +40,7 @@ const PromoSection = () => {
           <div className="flex items-start space-x-4">
             <Trophy className="w-8 h-8 flex-shrink-0 mt-1" />
             <div className="flex-grow">
-              <h3 className="text-xl font-bold mb-2">XM Competitions</h3>
+              <h3 className="text-xl font-bold mb-2">XEX Competitions</h3>
               <h4 className="text-2xl font-bold mb-2">
                 Win Your Share of $140,000 🎉
               </h4>
@@ -68,7 +67,7 @@ const PromoSection = () => {
           <div className="flex items-start space-x-4">
             <Users className="w-8 h-8 flex-shrink-0 mt-1" />
             <div className="flex-grow">
-              <h3 className="text-xl font-bold mb-2">XM COPY TRADING</h3>
+              <h3 className="text-xl font-bold mb-2">XEX COPY TRADING</h3>
               <h4 className="text-2xl font-bold mb-2">
                 Trade Like an Expert in No Time At All
               </h4>
