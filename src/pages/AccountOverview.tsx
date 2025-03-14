@@ -22,7 +22,7 @@ const AccountOverview = () => {
   const [accounts, setAccounts] = useState<Record<string, AccountData>>({
     real: {
       type: "Real Account",
-      accountNumber: "123456789",
+      accountNumber: "111400289",
       balance: 0,
       profit: 0, // Placeholder for profit/loss
       currency: "USD",
@@ -30,7 +30,7 @@ const AccountOverview = () => {
     },
     demo: {
       type: "Demo Account",
-      accountNumber: "987654321",
+      accountNumber: "999500312",
       balance: 10000,
       profit: 100, // Placeholder for profit/loss
       currency: "USD",
