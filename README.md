@@ -1,1 +1,1 @@
-# trading
+# tryb3.....ing
