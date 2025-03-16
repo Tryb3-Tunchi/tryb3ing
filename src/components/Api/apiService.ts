@@ -131,7 +131,7 @@ class ApiService {
         }
       }
 
-      let errorMessage = "API request failed";
+      let errorMessage = "Loading...login to continue.";
       try {
         const error = (await response.json()) as ApiError;
         errorMessage = error.message || errorMessage;
