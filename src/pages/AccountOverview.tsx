@@ -1,30 +1,42 @@
 import { useState, useEffect, useContext } from "react";
 import { MoreVertical, Download, Upload, Plus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { BalanceContext } from "../components/balance/BalanceContext"; // Import the BalanceContext
+import { BalanceContext } from "../components/balance/BalanceContext";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/Card";
-// import apiService from "../components/Api/apiService"; // Import the apiService
+import apiService from "../components/Api/apiService"; // Uncommented the apiService import
 
-// Define interfaces for account data
+// Define interfaces for account data and account summary
 interface AccountData {
   type: string;
   accountNumber: string;
   balance: number;
-  profit: number; // Placeholder for profit/loss
+  profit: number;
   currency: string;
   accountStyle: string;
+}
+
+interface AccountSummary {
+  id?: number;
+  user?: number;
+  profit_loss: string;
+  opened_position?: number | null;
+  margin: string;
+  free_margin: string;
+  margin_level: string;
+  [key: string]: any;
 }
 
 const AccountOverview = () => {
   const [accountType, setAccountType] = useState<"real" | "demo">("real");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [accountSummary, setAccountSummary] = useState<AccountSummary | null>(null);
   const [accounts, setAccounts] = useState<Record<string, AccountData>>({
     real: {
       type: "Real Account",
       accountNumber: "111400289",
       balance: 0,
-      profit: 0, // Placeholder for profit/loss
+      profit: 0,
       currency: "USD",
       accountStyle: "Standard",
     },
@@ -32,7 +44,7 @@ const AccountOverview = () => {
       type: "Demo Account",
       accountNumber: "999500312",
       balance: 10000,
-      profit: 100, // Placeholder for profit/loss
+      profit: 100,
       currency: "USD",
       accountStyle: "Practice",
     },
@@ -46,31 +58,52 @@ const AccountOverview = () => {
     isLoading: balanceLoading,
   } = useContext(BalanceContext);
 
+  // Fetch account summary data from API - same as in MyAccount component
+  const fetchAccountSummary = async () => {
+    try {
+      const summary = await apiService.getCurrentAccountSummary();
+      setAccountSummary(summary);
+      return summary;
+    } catch (err) {
+      console.error("Error fetching account summary:", err);
+      setAccountSummary(null);
+      return null;
+    }
+  };
+
   // Fetch account data and update balances
   useEffect(() => {
     const fetchAccountData = async () => {
       setIsLoading(true);
       try {
-        // Update account data based on balances
+        // Fetch account summary to get profit/loss data
+        const summary = await fetchAccountSummary();
+        
+        // Update account data based on balances and account summary
         const updatedAccounts = { ...accounts };
 
         // Find real balance (USD)
         const realBalance = balances.find((b) => b.currency === "USD");
         if (realBalance) {
+          // Use profit_loss from account summary if available, otherwise use placeholder
+          const profitLoss = summary ? parseFloat(summary.profit_loss || "0") : 0;
+          
           updatedAccounts.real = {
             ...updatedAccounts.real,
             balance: parseFloat(realBalance.amount),
-            profit: calculateProfitLoss(parseFloat(realBalance.amount) * 5), // Placeholder for profit/loss
+            profit: profitLoss, // Use actual profit/loss from API
           };
         }
 
         // Find demo balance (DEMO)
         const demoBalance = balances.find((b) => b.currency === "DEMO");
         if (demoBalance) {
+          // For demo, we could either have a separate API call or use a placeholder
+          // For now, using a placeholder since the focus seems to be on the real account
           updatedAccounts.demo = {
             ...updatedAccounts.demo,
             balance: parseFloat(demoBalance.amount),
-            profit: calculateProfitLoss(parseFloat(demoBalance.amount)), // Placeholder for profit/loss
+            profit: parseFloat(demoBalance.amount) * 0.05, // Placeholder for demo account
           };
         }
 
@@ -84,12 +117,6 @@ const AccountOverview = () => {
 
     fetchAccountData();
   }, [balances]); // Re-fetch when balances change
-
-  // Placeholder function for profit/loss calculation
-  const calculateProfitLoss = (balance: number): number => {
-    // Replace this with actual API call later
-    return balance * 0.05; // Example: 5% profit
-  };
 
   // Handle deposit action
   const handleDeposit = () => {
@@ -119,7 +146,7 @@ const AccountOverview = () => {
             demo: {
               ...prev.demo,
               balance: 1000,
-              profit: calculateProfitLoss(1000), // Update profit/loss placeholder
+              profit: 50, // Update profit placeholder
             },
           }));
         }
@@ -129,26 +156,28 @@ const AccountOverview = () => {
     }
   };
 
+  // Manual refresh function that updates both balances and account summary
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    try {
+      await Promise.all([
+        refreshBalances(),     // Refresh balances from BalanceContext
+        fetchAccountSummary()  // Refresh account summary
+      ]);
+      setIsMenuOpen(false);    // Close menu after refresh
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-6xl  mx-auto mt-20 px-4 py-8">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl text-blue-600 font-extrabold ">Welcome!</h1>
-        {/* <p className="text-gray-600">
-          Manage your trading accounts and balances with ease.
-        </p> */}
       </div>
-      {/* Verify Account Section */}
-      {/* <div className="my-16 font-semibold text-center border-b-4 pb-10">
-        <p className="text-2xl font-bold py-4">
-          Verify your account for full features
-        </p>
-        <Link to="/verify">
-          <button className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold">
-            Verify Now
-          </button>
-        </Link>
-      </div> */}
 
       {/* Account Overview Section */}
       <div className="my-8">
@@ -227,7 +256,7 @@ const AccountOverview = () => {
                   </button>
                   <button
                     className="w-full px-4 py-2 text-left hover:bg-gray-100"
-                    onClick={refreshBalances}
+                    onClick={handleRefresh}
                   >
                     Refresh Balance
                   </button>
@@ -248,10 +277,12 @@ const AccountOverview = () => {
             </h3>
             <div className="mt-2">
               <p className="text-gray-600 mb-1">Profit/Loss</p>
-              <h3 className="text-3xl font-bold text-green-500">
+              <h3 className={`text-3xl font-bold ${
+                accounts[accountType]?.profit >= 0 ? "text-green-500" : "text-red-500"
+              }`}>
                 {balanceLoading || isLoading
                   ? "Loading..."
-                  : `$${accounts[accountType]?.profit.toLocaleString(
+                  : `${accounts[accountType]?.profit >= 0 ? "+" : "-"}$${Math.abs(accounts[accountType]?.profit).toLocaleString(
                       undefined,
                       {
                         minimumFractionDigits: 2,
@@ -303,7 +334,6 @@ const AccountOverview = () => {
             <CardTitle>EUR/USD Market Chart</CardTitle>
           </CardHeader>
           <CardContent>
-            TradingView Widget
             <div className="h-[500px] w-full">
               <iframe
                 src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_12345&symbol=EURUSD&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&hideideas=1&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=EURUSD"
@@ -318,7 +348,6 @@ const AccountOverview = () => {
             <CardTitle>BTC/USD Market Chart</CardTitle>
           </CardHeader>
           <CardContent>
-            TradingView Widget
             <div className="h-[500px] w-full">
               <iframe
                 src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_12345&symbol=BTCUSD&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&hideideas=1&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=BTCUSD"
