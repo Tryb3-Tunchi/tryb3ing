@@ -62,6 +62,7 @@ const AccountOverview = () => {
   const fetchAccountSummary = async () => {
     try {
       const summary = await apiService.getCurrentAccountSummary();
+      accountSummary &&
       setAccountSummary(summary);
       return summary;
     } catch (err) {
