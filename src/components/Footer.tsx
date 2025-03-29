@@ -172,7 +172,7 @@ export default function Footer() {
                 <p>
                   <span className="font-semibold text-white">Legal:</span> This
                   website is operated by XEX Platform with registered address at
-                  Suite 101, 63 Eve Street, Belize City, Belize. XM Global
+                  Suite 101, 63 Eve Street, Belize City, Belize. XEX Global
                   Limited, registered by the Financial Services Commission (FSC)
                   under the Securities Industry Act 2021 (license number
                   000261/4) and Trading Point of Financial Instruments Limited,
