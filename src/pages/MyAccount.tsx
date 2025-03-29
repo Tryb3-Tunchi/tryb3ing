@@ -42,15 +42,25 @@ interface Withdrawal {
   user?: number;
 }
 
+interface AccountSummary {
+  id?: number;
+  user?: number;
+  profit_loss: string;
+  opened_position?: number | null;
+  margin: string;
+  free_margin: string;
+  margin_level: string;
+  [key: string]: any;
+}
+
 const MyAccount: React.FC = () => {
   const [showTrading, setShowTrading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [depositActivities, setDepositActivities] = useState<Activity[]>([]);
-  const [withdrawalActivities, setWithdrawalActivities] = useState<Activity[]>(
-    []
-  );
+  const [withdrawalActivities, setWithdrawalActivities] = useState<Activity[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [accountSummary, setAccountSummary] = useState<AccountSummary | null>(null);
 
   // Use context for global balance state
   const {
@@ -78,6 +88,17 @@ const MyAccount: React.FC = () => {
     } catch (e) {
       console.error("Error formatting timestamp:", e);
       return "Invalid date";
+    }
+  };
+
+  // Fetch account summary data from API
+  const fetchAccountSummary = async () => {
+    try {
+      const summary = await apiService.getCurrentAccountSummary();
+      setAccountSummary(summary);
+    } catch (err) {
+      console.error("Error fetching account summary:", err);
+      setAccountSummary(null);
     }
   };
 
@@ -144,9 +165,13 @@ const MyAccount: React.FC = () => {
   // Refresh all data
   const refreshData = async () => {
     setError(null);
+    setIsLoading(true);
     try {
-      await refreshBalances(); // Fetch balances
-      await fetchRecentActivity(); // Fetch recent activity
+      await Promise.all([
+        refreshBalances(),       // Fetch balances
+        fetchAccountSummary(),   // Fetch account summary
+        fetchRecentActivity()    // Fetch recent activity
+      ]);
       setIsLoading(false);
     } catch (err) {
       console.error("Error refreshing data:", err);
@@ -166,51 +191,57 @@ const MyAccount: React.FC = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Calculate derived account values if not provided by API
-  const calculateAccountData = () => {
-    if (!balances || balances.length === 0) {
-      return {
-        balance: 0,
-        equity: 0,
-        margin: 0,
-        freeMargin: 0,
-        marginLevel: 0,
-        openPositions: 0,
-        profitLoss: 0,
-      };
+  // Get account data, using account summary API data when available
+  const getAccountData = () => {
+    // Default values if data isn't available
+    let balance = 0;
+    let equity = 0;
+    let margin = 0;
+    let freeMargin = 0;
+    let marginLevel = 0;
+    let openPositions = 0;
+    let profitLoss = 0;
+
+    // Get balance from balances context
+    if (balances && balances.length > 0) {
+      // Find USD balance or use first one
+      const realBalance = balances.find((b) => b.currency === "USD");
+      const balanceObj = realBalance || balances[0];
+      balance = parseFloat(balanceObj.amount || "0");
     }
 
-    // Find the real account balance (USD)
-    const realBalance = balances.find((b) => b.currency === "USD");
-
-    // If no real balance is found, use the first balance
-    const balance = realBalance || balances[0];
-    const balanceAmount = parseFloat(balance.amount || "0");
+    // Use account summary data if available
+    if (accountSummary) {
+      profitLoss = parseFloat(accountSummary.profit_loss || "0");
+      margin = parseFloat(accountSummary.margin || "0");
+      freeMargin = parseFloat(accountSummary.free_margin || "0");
+      marginLevel = parseFloat(accountSummary.margin_level || "0");
+      openPositions = accountSummary.opened_position || 0;
+      
+      // Calculate equity based on balance and profit/loss
+      equity = balance + profitLoss;
+    } else {
+      // Fallback calculations if API data isn't available
+      equity = balance * 1.25;
+      margin = balance * 0.25;
+      freeMargin = balance * 0.8;
+      marginLevel = 450.5;
+      openPositions = 3;
+      profitLoss = balance * 0.25;
+    }
 
     return {
-      balance: balanceAmount,
-      equity: balance.equity
-        ? parseFloat(balance.equity)
-        : balanceAmount * 1.25,
-      margin: balance.margin
-        ? parseFloat(balance.margin)
-        : balanceAmount * 0.25,
-      freeMargin: balance.free_margin
-        ? parseFloat(balance.free_margin)
-        : balanceAmount * 0.8,
-      marginLevel: balance.margin_level
-        ? parseFloat(balance.margin_level)
-        : 450.5,
-      openPositions: 3, // This might need to come from another API endpoint
-      profitLoss: balance.profit_loss
-        ? parseFloat(balance.profit_loss)
-        : balance.equity
-        ? parseFloat(balance.equity) - balanceAmount
-        : balanceAmount * 0.25,
+      balance,
+      equity,
+      margin,
+      freeMargin,
+      marginLevel,
+      openPositions,
+      profitLoss,
     };
   };
 
-  const accountData = calculateAccountData();
+  const accountData = getAccountData();
 
   // Activity List Component (reusable)
   const ActivityList = ({ activities, title }) => (
@@ -382,7 +413,7 @@ const MyAccount: React.FC = () => {
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-600">Margin Level</p>
                   <p className="text-lg font-semibold">
-                    {accountData.marginLevel}%
+                    {accountData.marginLevel.toFixed(1)}%
                   </p>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-lg">
@@ -434,7 +465,6 @@ const MyAccount: React.FC = () => {
           <CardTitle>EUR/USD Market Chart</CardTitle>
         </CardHeader>
         <CardContent>
-          TradingView Widget
           <div className="h-[500px] w-full">
             <iframe
               src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_12345&symbol=EURUSD&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&hideideas=1&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=EURUSD"

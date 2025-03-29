@@ -73,6 +73,25 @@ interface WithdrawalRequestData {
   routing_number?: string;
 }
 
+// Define AccountSummary interface based on the provided schema
+interface AccountSummary {
+  id?: number;
+  user?: number;
+  profit_loss: string;
+  opened_position?: number | null;
+  margin: string;
+  free_margin: string;
+  margin_level: string;
+  [key: string]: any;
+}
+
+interface AccountSummariesResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: AccountSummary[];
+}
+
 interface ApiError {
   message: string;
   [key: string]: any;
@@ -502,6 +521,68 @@ class ApiService {
     return this.fetch<void>(`/api/withdrawals/${id}/`, {
       method: "DELETE",
     });
+  }
+
+  // Account Summary Methods
+  public async getAccountSummaries(): Promise<AccountSummary[]> {
+    try {
+      const response = await this.fetch<AccountSummariesResponse>("/api/account-summaries/");
+      return response.results;
+    } catch (error) {
+      console.error("Error fetching account summaries:", error);
+      throw error;
+    }
+  }
+
+  public async getAccountSummary(id: number): Promise<AccountSummary> {
+    return this.fetch<AccountSummary>(`/api/account-summaries/${id}/`);
+  }
+
+  public async createAccountSummary(accountSummaryData: Partial<AccountSummary>): Promise<AccountSummary> {
+    return this.fetch<AccountSummary>("/api/account-summaries/", {
+      method: "POST",
+      body: JSON.stringify(accountSummaryData),
+    });
+  }
+
+  public async updateAccountSummary(
+    id: number,
+    accountSummaryData: Partial<AccountSummary>
+  ): Promise<AccountSummary> {
+    return this.fetch<AccountSummary>(`/api/account-summaries/${id}/`, {
+      method: "PUT",
+      body: JSON.stringify(accountSummaryData),
+    });
+  }
+
+  public async partialUpdateAccountSummary(
+    id: number,
+    accountSummaryData: Partial<AccountSummary>
+  ): Promise<AccountSummary> {
+    return this.fetch<AccountSummary>(`/api/account-summaries/${id}/`, {
+      method: "PATCH",
+      body: JSON.stringify(accountSummaryData),
+    });
+  }
+
+  public async deleteAccountSummary(id: number): Promise<void> {
+    return this.fetch<void>(`/api/account-summaries/${id}/`, {
+      method: "DELETE",
+    });
+  }
+
+  // Get current user's account summary - returns the first summary or null if none exists
+  public async getCurrentAccountSummary(): Promise<AccountSummary | null> {
+    try {
+      const summaries = await this.getAccountSummaries();
+      if (summaries && summaries.length > 0) {
+        return summaries[0];
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching current account summary:", error);
+      throw error;
+    }
   }
 
   // Profile Methods
