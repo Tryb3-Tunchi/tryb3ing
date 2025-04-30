@@ -8,7 +8,7 @@ const TestimonialSection = () => {
   const testimonials = [
     {
       quote:
-        "DeeSwiftFx Trade has transformed my investment strategy. Their platform is intuitive and the returns have exceeded my expectations.",
+        "XEX Platform Trade has transformed my investment strategy. Their platform is intuitive and the returns have exceeded my expectations.",
       author: "Sarah Johnson",
       position: "Tech Entrepreneur",
       rating: 5,
@@ -16,7 +16,7 @@ const TestimonialSection = () => {
     },
     {
       quote:
-        "I've been investing with DeeSwiftFx Trade for two years now. Their customer service is exceptional and the portfolio performance speaks for itself.",
+        "I've been investing with XEX Platform Trade for two years now. Their customer service is exceptional and the portfolio performance speaks for itself.",
       author: "Michael Chen",
       position: "Financial Analyst",
       rating: 5,
@@ -24,7 +24,7 @@ const TestimonialSection = () => {
     },
     {
       quote:
-        "As someone new to investing, DeeSwiftFx Trade made the process simple and transparent. I appreciate their educational resources and personalized approach.",
+        "As someone new to investing, XEX Platform Trade made the process simple and transparent. I appreciate their educational resources and personalized approach.",
       author: "Emily Rodriguez",
       position: "Healthcare Professional",
       rating: 4,
@@ -32,7 +32,7 @@ const TestimonialSection = () => {
     },
     {
       quote:
-        "The analytical tools provided by DeeSwiftFx Trade have helped me make informed investment decisions. Their platform is a game-changer.",
+        "The analytical tools provided by XEX Platform Trade have helped me make informed investment decisions. Their platform is a game-changer.",
       author: "David Smith",
       position: "Data Scientist",
       rating: 5,
@@ -40,7 +40,7 @@ const TestimonialSection = () => {
     },
     {
       quote:
-        "I'm impressed by the consistent returns and professional guidance. DeeSwiftFx Trade has exceeded my expectations in every way.",
+        "I'm impressed by the consistent returns and professional guidance. XEX Platform Trade has exceeded my expectations in every way.",
       author: "Lisa Wong",
       position: "Business Owner",
       rating: 5,
@@ -48,7 +48,7 @@ const TestimonialSection = () => {
     },
     {
       quote:
-        "The personalized investment strategies and attentive support team make DeeSwiftFx Trade stand out in the industry.",
+        "The personalized investment strategies and attentive support team make XEX Platform Trade stand out in the industry.",
       author: "James Martinez",
       position: "Marketing Director",
       rating: 4,
@@ -91,7 +91,7 @@ const TestimonialSection = () => {
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Don't just take our word for it. Here's what our clients have to say
-            about their experience with DeeSwiftFx Trade.
+            about their experience with XEX Platform Trade.
           </p>
         </div>
 
