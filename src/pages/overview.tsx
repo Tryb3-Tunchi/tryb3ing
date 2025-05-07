@@ -293,7 +293,7 @@ const Overview = () => {
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Link to="/signup">
                 <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full transition-all duration-300 transform hover:scale-105">
-                  Start Trading Now
+                  Get Started
                 </button>
               </Link>
               <Link to="/promotions">
